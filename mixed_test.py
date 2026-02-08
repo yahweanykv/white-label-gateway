@@ -30,9 +30,7 @@ def main():
     print("=" * 110)
     print("Смешанный тест — mixed endpoints")
     print("=" * 110)
-    print(
-        f"Duration: {DURATION}s %"
-    )
+    print(f"Duration: {DURATION}s %")
     print("-" * 110)
 
     start = time.perf_counter()

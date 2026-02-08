@@ -152,7 +152,7 @@ async def get_merchant_by_api_key(
         f"X-API-Key from headers: {x_api_key[:20]}..."
         if x_api_key and len(x_api_key) > 20
         else f"X-API-Key: {x_api_key}"
-        )
+    )
 
     # проверка наличия ключа
     if not x_api_key:
@@ -194,7 +194,6 @@ async def get_merchant_by_api_key(
         updated_at=merchant.updated_at,
         metadata=None,
     )
-
 
 
 @router.get("/all", response_model=list[MerchantResponse])

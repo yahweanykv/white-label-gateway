@@ -121,7 +121,9 @@ async def create_loadtest_merchant():
             await db_session.commit()
             logger.info(f"Load test merchant created with API key: {LOADTEST_API_KEY}")
     except IntegrityError:
-        logger.info("Load test merchant already exists (race), skipping")  # Duplicate from another worker
+        logger.info(
+            "Load test merchant already exists (race), skipping"
+        )  # Duplicate from another worker
     except Exception as e:
         logger.error(f"Error creating load test merchant: {e}")
 
