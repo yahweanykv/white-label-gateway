@@ -59,8 +59,8 @@ jobs:
           virtualenvs-in-project: true
       
       - name: Install dependencies
-        run: poetry install --no-interaction
-      
+        run: poetry install --no-interaction --no-root
+
       - name: Run tests for ${{ matrix.service }}
         run: poetry run pytest services/${{ matrix.service }}/tests -v --cov=services/${{ matrix.service }}/src
 

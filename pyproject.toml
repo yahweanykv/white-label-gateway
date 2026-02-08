@@ -1,7 +1,6 @@
 [tool.poetry]
 name = "white-label-gateway"
 version = "0.1.0"
-package-mode = false
 description = "White-label payment gateway with microservices architecture"
 authors = ["Your Name <your.email@example.com>"]
 readme = "README.md"
