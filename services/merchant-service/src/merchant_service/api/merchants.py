@@ -1,5 +1,6 @@
 """Merchant API routes."""
 
+# --- мерчанты: CRUD, by-api-key, all ---
 import secrets
 from typing import Annotated
 from uuid import UUID
@@ -46,7 +47,6 @@ async def create_merchant(
     Returns:
         Created merchant
     """
-    # Check if domain already exists
     if merchant_create.domain:
         result = await db.execute(select(Merchant).where(Merchant.domain == merchant_create.domain))
         existing = result.scalar_one_or_none()
@@ -56,7 +56,6 @@ async def create_merchant(
                 detail=f"Merchant with domain {merchant_create.domain} already exists",
             )
 
-    # Create new merchant
     api_key = generate_api_key()
     merchant = Merchant(
         name=merchant_create.name,
@@ -131,7 +130,7 @@ async def get_merchant_by_api_key(
     Returns:
         Merchant data in gateway format
     """
-    # Добавить логирование
+    # логирование и получение X-API-Key (разные регистры — обход валидации FastAPI)
     from shared.utils.logger import setup_logger
     import os
 
@@ -139,11 +138,10 @@ async def get_merchant_by_api_key(
         __name__, level="INFO", json_logs=os.getenv("JSON_LOGS", "false").lower() == "true"
     )
 
-    # Получить заголовок напрямую из request (избегаем проблем с валидацией FastAPI)
     all_headers = dict(request.headers)
     logger.info(f"Received /by-api-key request. Headers keys: {list(all_headers.keys())}")
 
-    # Попробовать получить заголовок в разных регистрах
+    # X-API-Key из заголовка (X-API-Key, x-api-key, X-Api-Key)
     x_api_key = (
         request.headers.get("X-API-Key")
         or request.headers.get("x-api-key")
@@ -154,8 +152,9 @@ async def get_merchant_by_api_key(
         f"X-API-Key from headers: {x_api_key[:20]}..."
         if x_api_key and len(x_api_key) > 20
         else f"X-API-Key: {x_api_key}"
-    )
+        )
 
+    # проверка наличия ключа
     if not x_api_key:
         logger.error("X-API-Key header is missing")
         raise HTTPException(
@@ -164,6 +163,7 @@ async def get_merchant_by_api_key(
             headers={"WWW-Authenticate": "ApiKey"},
         )
 
+    # поиск мерчанта по ключу
     from sqlalchemy import select
 
     result = await db.execute(
@@ -179,11 +179,11 @@ async def get_merchant_by_api_key(
             detail="Merchant not found",
         )
 
-    # Convert to gateway format
+    # конвертация в формат gateway
     return MerchantByApiKeyResponse(
         merchant_id=merchant.id,
         name=merchant.name,
-        email=f"{merchant.name.lower().replace(' ', '')}@example.com",  # Placeholder email
+        email=f"{merchant.name.lower().replace(' ', '')}@example.com",
         status="active" if merchant.is_active else "inactive",
         api_key=x_api_key,
         webhook_url=merchant.webhook_url,
@@ -194,6 +194,7 @@ async def get_merchant_by_api_key(
         updated_at=merchant.updated_at,
         metadata=None,
     )
+
 
 
 @router.get("/all", response_model=list[MerchantResponse])
@@ -278,7 +279,6 @@ async def update_current_merchant(
     Returns:
         Updated merchant data
     """
-    # Check domain uniqueness if updating domain
     if merchant_update.domain and merchant_update.domain != current_merchant.domain:
         result = await db.execute(
             select(Merchant).where(
@@ -292,7 +292,6 @@ async def update_current_merchant(
                 detail=f"Merchant with domain {merchant_update.domain} already exists",
             )
 
-    # Update fields
     update_data = merchant_update.model_dump(exclude_unset=True)
     for field, value in update_data.items():
         if field in {"logo_url", "webhook_url"} and value:

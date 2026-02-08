@@ -1,5 +1,6 @@
 """Merchant service main entry point."""
 
+# --- импорты ---
 import os
 import signal
 import uvicorn
@@ -24,6 +25,7 @@ logger = setup_logger(
 )
 
 
+# --- lifespan: база, demo, loadtest ---
 async def init_database():
     """Initialize database tables."""
     from shared.database import db
@@ -32,7 +34,6 @@ async def init_database():
         logger.error("Database not initialized")
         return
 
-    # Create tables
     async with db.engine.begin() as conn:
         await conn.run_sync(Base.metadata.create_all)
     logger.info("Database tables created")
@@ -51,15 +52,13 @@ async def create_demo_merchant():
 
     try:
         async with db.get_session() as db_session:
-            # Check if any merchant exists (limit 1 to avoid scalar_one_or_none error)
             result = await db_session.execute(select(Merchant).limit(1))
-            existing = result.scalar_one_or_none()
+            existing = result.scalar_one_or_none()  # limit(1) required for scalar_one_or_none
 
             if existing:
                 logger.info("Merchants already exist, skipping demo merchant creation")
                 return
 
-            # Create demo merchant
             import secrets
 
             api_key = f"sk_live_{secrets.token_urlsafe(32)}"
@@ -98,7 +97,6 @@ async def create_loadtest_merchant():
 
     try:
         async with db.get_session() as db_session:
-            # Check if load test merchant already exists (limit 1 for safety)
             result = await db_session.execute(
                 select(Merchant).where(Merchant.api_keys.contains([LOADTEST_API_KEY])).limit(1)
             )
@@ -108,7 +106,6 @@ async def create_loadtest_merchant():
                 logger.info("Load test merchant already exists, skipping")
                 return
 
-            # Create load test merchant
             loadtest_merchant = Merchant(
                 name="Load Test Merchant",
                 domain="loadtest.example.com",
@@ -124,8 +121,7 @@ async def create_loadtest_merchant():
             await db_session.commit()
             logger.info(f"Load test merchant created with API key: {LOADTEST_API_KEY}")
     except IntegrityError:
-        # Duplicate domain/key from another worker — merchant already exists
-        logger.info("Load test merchant already exists (race), skipping")
+        logger.info("Load test merchant already exists (race), skipping")  # Duplicate from another worker
     except Exception as e:
         logger.error(f"Error creating load test merchant: {e}")
 
@@ -138,28 +134,20 @@ async def lifespan(app: FastAPI):
     Args:
         app: FastAPI application
     """
-    # Startup
     logger.info("Starting Merchant service...")
     service_health.labels(service="merchant-service").set(1)
 
-    # Initialize database
     db_settings = DatabaseSettings(database_url=settings.database_url)
     init_db(db_settings)
 
-    # Create tables
     await init_database()
-
-    # Create demo merchant
     await create_demo_merchant()
-
-    # Create load test merchant (for Locust/load testing)
     await create_loadtest_merchant()
 
     logger.info("Merchant service started successfully")
 
     yield
 
-    # Shutdown
     logger.info("Shutting down Merchant service...")
     service_health.labels(service="merchant-service").set(0)
 
@@ -171,10 +159,8 @@ app = FastAPI(
     lifespan=lifespan,
 )
 
-# Prometheus metrics middleware
+# --- middleware ---
 app.add_middleware(PrometheusMiddleware, service_name="merchant-service")
-
-# CORS middleware
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
@@ -184,7 +170,7 @@ app.add_middleware(
 )
 
 
-# Add exception handler for validation errors to see what's wrong
+# --- exception handler ---
 @app.exception_handler(RequestValidationError)
 async def validation_exception_handler(request: FastAPIRequest, exc: RequestValidationError):
     """Handle validation errors with detailed logging."""
@@ -202,10 +188,11 @@ async def validation_exception_handler(request: FastAPIRequest, exc: RequestVali
     )
 
 
-# Include routers
+# --- роуты ---
 app.include_router(router, prefix="/api/v1")
 
 
+# --- эндпоинты: health, metrics ---
 @app.get("/health")
 async def health_check():
     """Health check endpoint."""
@@ -223,13 +210,11 @@ def signal_handler(signum, frame):
     logger.info(f"Received signal {signum}, initiating graceful shutdown...")
 
 
+# --- запуск ---
 def main():
     """Run the merchant service."""
-    # Set up signal handlers for graceful shutdown
     signal.signal(signal.SIGTERM, signal_handler)
     signal.signal(signal.SIGINT, signal_handler)
-
-    # Set service name for logging
     os.environ["SERVICE_NAME"] = "merchant-service"
 
     uvicorn.run(

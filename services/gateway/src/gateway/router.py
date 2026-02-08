@@ -11,6 +11,7 @@ from shared.models.merchant import Merchant
 router = APIRouter()
 
 
+# --- health ---
 @router.get("/health")
 async def health_check():
     """
@@ -22,8 +23,7 @@ async def health_check():
     return {"status": "healthy", "service": "gateway"}
 
 
-# Include payment routes under /v1/payments
-# Note: get_current_merchant dependency is applied at router level
+# --- payments, mock (get_current_merchant на уровне роутера) ---
 router.include_router(
     payments_router,
     prefix="/v1/payments",
@@ -32,6 +32,7 @@ router.include_router(
 router.include_router(mock_router)
 
 
+# --- me ---
 @router.get("/v1/me")
 async def get_current_user_info(
     current_merchant: Annotated[Merchant, Depends(get_current_merchant)],

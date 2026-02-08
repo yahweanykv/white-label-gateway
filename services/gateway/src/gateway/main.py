@@ -1,5 +1,6 @@
 """Gateway service main entry point."""
 
+# --- импорты ---
 import os
 import signal
 import uvicorn
@@ -30,7 +31,6 @@ async def lifespan(app: FastAPI):
     Args:
         app: FastAPI application
     """
-    # Startup
     logger.info("Starting Gateway service...")
     service_health.labels(service="gateway").set(1)
     redis_client = get_redis()
@@ -39,7 +39,6 @@ async def lifespan(app: FastAPI):
 
     yield
 
-    # Shutdown
     logger.info("Shutting down Gateway service...")
     service_health.labels(service="gateway").set(0)
     await redis_client.disconnect()
@@ -96,6 +95,7 @@ def custom_openapi():
     return app.openapi_schema
 
 
+# --- app: OpenAPI, middleware, rate limit, tenant ---
 app = FastAPI(
     title="White-Label Payment Gateway API",
     description="White-label payment gateway API with multi-tenant support",
@@ -104,17 +104,13 @@ app = FastAPI(
     openapi_url="/openapi.json",
     docs_url="/docs",
     redoc_url="/redoc",
-    redirect_slashes=True,  # Allow redirects (default behavior)
+    redirect_slashes=True,
 )
 
-# Override OpenAPI schema generation
 app.openapi = custom_openapi
 
-# Prometheus metrics middleware (should be first to capture all requests)
+# прометей, CORS, rate limit, tenant (порядок: tenant до rate limit для api_key)
 app.add_middleware(PrometheusMiddleware, service_name="gateway")
-
-# CORS middleware - must be before other middlewares that might block OPTIONS
-# Explicitly allow X-API-Key header for CORS preflight requests
 app.add_middleware(
     CORSMiddleware,
     allow_origins=settings.cors_origins_list if settings.cors_origins_list else ["*"],
@@ -124,7 +120,6 @@ app.add_middleware(
     expose_headers=["X-RateLimit-Limit", "X-RateLimit-Remaining", "X-RateLimit-Reset"],
 )
 
-# Rate limiting middleware (add first so Tenant runs before it - api_key needed for per-key limits)
 if settings.rate_limit_enabled:
     redis_client = get_redis()
     app.add_middleware(
@@ -133,15 +128,14 @@ if settings.rate_limit_enabled:
         rate_limit_requests=settings.rate_limit_requests,
     )
 
-# Tenant middleware (extract tenant_id from X-API-Key and subdomains)
-# Must run before RateLimitMiddleware so request.state.api_key is set for per-key limits
 app.add_middleware(TenantMiddleware)
 
 
-# Include routers
+# --- роуты ---
 app.include_router(router)
 
 
+# --- эндпоинты: root, metrics ---
 @app.get("/")
 async def root():
     """
@@ -173,16 +167,13 @@ async def metrics():
 def signal_handler(signum, frame):
     """Handle shutdown signals gracefully."""
     logger.info(f"Received signal {signum}, initiating graceful shutdown...")
-    # The lifespan context manager will handle cleanup
 
 
+# --- запуск ---
 def main():
     """Run the gateway service."""
-    # Set up signal handlers for graceful shutdown
     signal.signal(signal.SIGTERM, signal_handler)
     signal.signal(signal.SIGINT, signal_handler)
-
-    # Set service name for logging
     os.environ["SERVICE_NAME"] = "gateway"
 
     uvicorn.run(

@@ -42,8 +42,6 @@ async def send_notification(notification_request: NotificationRequest):
     Returns:
         Notification response
     """
-    # TODO: Implement notification sending logic
-    # TODO: Support email, SMS, and webhook notifications
     from uuid import uuid4
 
     return NotificationResponse(

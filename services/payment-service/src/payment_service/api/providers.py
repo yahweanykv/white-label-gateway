@@ -9,7 +9,6 @@ from payment_service.core.mock_providers import MOCK_PROVIDERS
 
 router = APIRouter()
 
-# In-memory storage for current provider (only for local environment)
 _current_provider: str = settings.payment_provider
 
 

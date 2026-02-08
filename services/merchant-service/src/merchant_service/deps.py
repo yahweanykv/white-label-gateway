@@ -10,12 +10,9 @@ from merchant_service.config import settings
 from merchant_service.models import Merchant
 
 
-# Initialize database
 db_settings = DatabaseSettings(database_url=settings.database_url)
 init_db(db_settings)  # pragma: no cover - module initialization
 
-
-# Use shared get_db directly as dependency
 get_db = shared_get_db
 
 
@@ -45,7 +42,6 @@ async def get_current_merchant(
 
     from sqlalchemy import select
 
-    # Query merchant by API key
     result = await db.execute(
         select(Merchant).where(
             Merchant.api_keys.contains([x_api_key]), Merchant.is_active.is_(True)

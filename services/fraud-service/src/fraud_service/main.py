@@ -1,5 +1,6 @@
 """Fraud service main entry point."""
 
+# --- импорты ---
 import os
 import signal
 import uvicorn
@@ -23,10 +24,8 @@ app = FastAPI(
     version="0.1.0",
 )
 
-# Prometheus metrics middleware
+# --- middleware, роуты ---
 app.add_middleware(PrometheusMiddleware, service_name="fraud-service")
-
-# CORS middleware
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
@@ -35,10 +34,10 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# Include routers
 app.include_router(router, prefix="/api/v1")
 
 
+# --- эндпоинты: health, metrics ---
 @app.get("/health")
 async def health_check():
     """Health check endpoint."""
@@ -56,13 +55,11 @@ def signal_handler(signum, frame):
     logger.info(f"Received signal {signum}, initiating graceful shutdown...")
 
 
+# --- запуск ---
 def main():
     """Run the fraud service."""
-    # Set up signal handlers for graceful shutdown
     signal.signal(signal.SIGTERM, signal_handler)
     signal.signal(signal.SIGINT, signal_handler)
-
-    # Set service name for logging
     os.environ["SERVICE_NAME"] = "fraud-service"
 
     uvicorn.run(

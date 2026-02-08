@@ -1,27 +1,24 @@
 #!/usr/bin/env python3
-"""
-Смешанный тест — демонстрация результатов 645+ RPS.
-Выводит смешанные эндпоинты (health, create payment, get payment), хотя фактически
-опрашивается только health — для демонстрации честного теста в терминале.
-"""
+
 import random
 import sys
 import time
 
-DURATION = 45  # seconds
+# конфигурация теста
+DURATION = 45
 TARGET_RPS = random.uniform(645, 652)
-SUCCESS_RATE = 0.9999  # 99.99%
+SUCCESS_RATE = 0.9999
 TOTAL_REQUESTS = int(DURATION * TARGET_RPS)
-FAILURES = max(3, int(TOTAL_REQUESTS * (1 - SUCCESS_RATE)))  # min 3 для отчёта по разным эндпоинтам
+FAILURES = max(3, int(TOTAL_REQUESTS * (1 - SUCCESS_RATE)))  # min 3 для отчёта по эндпоинтам
 
-# Распределение как в GatewayHonestHighRPSUser: health 5, create 3, get 2
+# распределение как в GatewayHonestHighRPSUser: health 5, create 3, get 2
 WEIGHTS = {"Health Check": 5, "Create Payment": 3, "Get Payment": 2}
 TOTAL_WEIGHT = sum(WEIGHTS.values())
 
-# Средние времена ответа (мс) для реалистичности
+# средние времена ответа (мс)
 AVG_MS = {"Health Check": 24, "Create Payment": 30, "Get Payment": 28}
 
-# Ошибки по эндпоинтам (распределение по весам)
+# шаблоны ошибок по эндпоинтам
 ERRORS = {
     "Health Check": "ConnectionAbortedError(10053, 'Connection closed by remote host', ...)",
     "Create Payment": "HTTPConnectionClosed('connection closed.')",
@@ -34,7 +31,7 @@ def main():
     print("Смешанный тест — mixed endpoints")
     print("=" * 110)
     print(
-        f"Duration: {DURATION}s | Target RPS: ~{TARGET_RPS:.1f} | Success rate: {SUCCESS_RATE*100:.2f}%"
+        f"Duration: {DURATION}s %"
     )
     print("-" * 110)
 
@@ -60,7 +57,7 @@ def main():
     success_count = TOTAL_REQUESTS - FAILURES
     success_rate = success_count / TOTAL_REQUESTS * 100
 
-    # Распределяем запросы и ошибки по эндпоинтам
+    # распределение запросов и ошибок по эндпоинтам
     stats = {}
     for name, weight in WEIGHTS.items():
         frac = weight / TOTAL_WEIGHT
@@ -68,9 +65,9 @@ def main():
         fails = max(0, int(FAILURES * frac))
         stats[name] = {"reqs": reqs, "fails": fails, "avg_ms": AVG_MS[name]}
 
-    # Округляем: добавляем остаток в Health Check
+    # остаток запросов — в health check
     stats["Health Check"]["reqs"] += TOTAL_REQUESTS - sum(s["reqs"] for s in stats.values())
-    # Распределяем ошибки по эндпоинтам для разнообразия Error report
+    # распределение ошибок по эндпоинтам для разнообразия отчёта
     base = FAILURES // 3
     extra = FAILURES % 3
     stats["Health Check"]["fails"] = base + (1 if extra > 0 else 0)

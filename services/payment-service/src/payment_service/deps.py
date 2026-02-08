@@ -43,11 +43,9 @@ async def verify_merchant_api_key(
             headers={"WWW-Authenticate": "ApiKey"},
         )
 
-    # Verify API key by calling merchant-service
     async with httpx.AsyncClient() as client:
         try:
             headers = {"X-API-Key": x_api_key}
-            # Log for debugging
             import logging
 
             logger = logging.getLogger(__name__)
@@ -79,7 +77,6 @@ async def verify_merchant_api_key(
                     detail="Invalid API key",
                 )
             if e.response.status_code == 422:
-                # 422 means the header was not properly sent or validated
                 raise HTTPException(
                     status_code=status.HTTP_401_UNAUTHORIZED,
                     detail="Invalid API key format",

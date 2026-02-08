@@ -1,5 +1,6 @@
 """Dashboard API routes."""
 
+# --- дашборд: статистика, HTML с брендингом ---
 from decimal import Decimal
 from typing import Annotated
 
@@ -37,7 +38,6 @@ async def get_payment_stats(merchant_id: str) -> dict:
         Decimal(str(p.get("amount", 0))) for p in payments if p.get("status") == "succeeded"
     )
 
-    # Get currency from first successful payment, or default to USD
     currency = "USD"
     for p in payments:
         if p.get("status") == "succeeded" and p.get("currency"):
@@ -72,7 +72,6 @@ async def get_dashboard(
     """
     from sqlalchemy import select
 
-    # Try to get merchant from header first
     current_merchant = None
     x_api_key = (
         request.headers.get("X-API-Key")
@@ -91,7 +90,6 @@ async def get_dashboard(
         except Exception as e:
             logger.warning(f"Error getting merchant from header: {e}")
 
-    # If no merchant from header auth, try query parameter
     if not current_merchant:
         api_key = request.query_params.get("api_key")
         if api_key:
@@ -124,7 +122,6 @@ async def get_dashboard(
     logo_url = current_merchant.logo_url or "https://via.placeholder.com/150"
     merchant_name = current_merchant.name
 
-    # Get payment statistics
     stats = await get_payment_stats(str(current_merchant.id))
 
     html_content = f"""

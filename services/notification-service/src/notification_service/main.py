@@ -1,5 +1,6 @@
 """Notification service main entry point."""
 
+# --- импорты ---
 import asyncio
 import os
 import signal
@@ -21,10 +22,10 @@ logger = setup_logger(
     __name__, level=settings.log_level, json_logs=os.getenv("JSON_LOGS", "false").lower() == "true"
 )
 
-# Global task for consumer
 consumer_task: asyncio.Task | None = None
 
 
+# --- lifespan: RabbitMQ consumer ---
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     """
@@ -35,11 +36,9 @@ async def lifespan(app: FastAPI):
     """
     global consumer_task
 
-    # Startup
     logger.info("Starting Notification service...")
     service_health.labels(service="notification-service").set(1)
 
-    # Start RabbitMQ consumer in background
     consumer_task = asyncio.create_task(start_consumer())
     logger.info("RabbitMQ consumer started")
 
@@ -47,7 +46,6 @@ async def lifespan(app: FastAPI):
 
     yield
 
-    # Shutdown
     logger.info("Shutting down Notification service...")
     service_health.labels(service="notification-service").set(0)
     if consumer_task:
@@ -66,10 +64,8 @@ app = FastAPI(
     lifespan=lifespan,
 )
 
-# Prometheus metrics middleware
+# --- middleware, роуты ---
 app.add_middleware(PrometheusMiddleware, service_name="notification-service")
-
-# CORS middleware
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
@@ -78,7 +74,6 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# Include routers
 app.include_router(router, prefix="/api/v1")
 
 
@@ -99,13 +94,11 @@ def signal_handler(signum, frame):
     logger.info(f"Received signal {signum}, initiating graceful shutdown...")
 
 
+# --- запуск ---
 def main():
     """Run the notification service."""
-    # Set up signal handlers for graceful shutdown
     signal.signal(signal.SIGTERM, signal_handler)
     signal.signal(signal.SIGINT, signal_handler)
-
-    # Set service name for logging
     os.environ["SERVICE_NAME"] = "notification-service"
 
     uvicorn.run(

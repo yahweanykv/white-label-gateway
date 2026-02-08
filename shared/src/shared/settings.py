@@ -1,5 +1,6 @@
-"""Pydantic BaseSettings with service-specific prefixes."""
+"""Pydantic BaseSettings с префиксами по сервисам."""
 
+# --- настройки по сервисам ---
 from functools import lru_cache
 
 from pydantic import Field
@@ -16,7 +17,6 @@ class BaseServiceSettings(BaseSettings):
         extra="ignore",
     )
 
-    # Common settings
     env: str = Field(default="development", description="Environment (development/production)")
     log_level: str = Field(default="INFO", description="Logging level")
     debug: bool = Field(default=False, description="Debug mode")
