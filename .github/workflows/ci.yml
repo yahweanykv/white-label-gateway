@@ -81,7 +81,8 @@ jobs:
       - name: Build Docker image for ${{ matrix.service }}
         uses: docker/build-push-action@v5
         with:
-          context: ./services/${{ matrix.service }}
+          context: .
+          file: ./services/${{ matrix.service }}/Dockerfile
           push: false
           tags: white-label-gateway/${{ matrix.service }}:latest
           cache-from: type=gha
