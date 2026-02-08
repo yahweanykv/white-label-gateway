@@ -63,4 +63,3 @@ def random_merchant_id():
 def random_payment_id():
     """Generate random payment ID."""
     return uuid4()
-

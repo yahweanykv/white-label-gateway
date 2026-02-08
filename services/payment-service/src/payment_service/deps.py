@@ -49,8 +49,13 @@ async def verify_merchant_api_key(
             headers = {"X-API-Key": x_api_key}
             # Log for debugging
             import logging
+
             logger = logging.getLogger(__name__)
-            logger.info(f"Calling merchant-service with X-API-Key header: {x_api_key[:10]}..." if x_api_key else "No API key provided")
+            logger.info(
+                f"Calling merchant-service with X-API-Key header: {x_api_key[:10]}..."
+                if x_api_key
+                else "No API key provided"
+            )
             response = await client.get(
                 f"{settings.merchant_service_url}/api/v1/merchants/by-api-key",
                 headers=headers,
@@ -88,4 +93,3 @@ async def verify_merchant_api_key(
                 status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
                 detail="Merchant service unavailable",
             )
-

@@ -35,7 +35,7 @@ class TenantMiddleware(BaseHTTPMiddleware):
         # Skip processing for OPTIONS requests (CORS preflight)
         if request.method == "OPTIONS":
             return await call_next(request)
-        
+
         tenant_id: Optional[UUID] = None
 
         # Try to extract tenant_id from X-API-Key header
@@ -101,7 +101,7 @@ class RateLimitMiddleware(BaseHTTPMiddleware):
         # Skip rate limiting for OPTIONS (CORS preflight), health, docs, and openapi endpoints
         if request.method == "OPTIONS":
             return await call_next(request)
-        
+
         skip_paths = ["/health", "/docs", "/openapi.json", "/redoc", "/"]
         if request.url.path in skip_paths:
             return await call_next(request)
@@ -116,6 +116,7 @@ class RateLimitMiddleware(BaseHTTPMiddleware):
         elif api_key:
             # Use API key hash as identifier
             import hashlib
+
             api_key_hash = hashlib.sha256(api_key.encode()).hexdigest()[:16]
             key = f"rate_limit:api_key:{api_key_hash}"
         else:
@@ -159,4 +160,3 @@ class RateLimitMiddleware(BaseHTTPMiddleware):
         response.headers["X-RateLimit-Reset"] = "1"
 
         return response
-

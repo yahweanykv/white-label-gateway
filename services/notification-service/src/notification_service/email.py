@@ -70,4 +70,3 @@ async def send_email(
         error_msg = f"Unexpected error sending email to {to_email}: {str(e)}"
         logger.error(error_msg)
         return False, error_msg
-

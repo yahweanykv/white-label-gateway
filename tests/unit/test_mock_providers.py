@@ -225,4 +225,3 @@ class TestGetProvider:
         provider1 = get_provider("MOCK_SUCCESS")
         provider2 = get_provider("mock_success")
         assert type(provider1) == type(provider2)
-

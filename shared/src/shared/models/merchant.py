@@ -46,4 +46,3 @@ class MerchantCreate(BaseModel):
     email: EmailStr
     webhook_url: Optional[str] = None
     metadata: Optional[dict] = None
-

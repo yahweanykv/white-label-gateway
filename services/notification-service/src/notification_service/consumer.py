@@ -9,7 +9,12 @@ from aio_pika import IncomingMessage
 from shared.utils.logger import setup_logger
 
 from notification_service.config import settings
-from notification_service.models import PaymentEvent, DeliveryAttempt, NotificationType, DeliveryStatus
+from notification_service.models import (
+    PaymentEvent,
+    DeliveryAttempt,
+    NotificationType,
+    DeliveryStatus,
+)
 from notification_service.webhook import send_webhook
 from notification_service.email import send_email
 from notification_service.retry import retry_with_backoff
@@ -198,9 +203,7 @@ Please try again or contact support.
                         error_message=error,
                     )
                 )
-                logger.warning(
-                    f"Email delivery attempt {attempt_num}: {status}, error={error}"
-                )
+                logger.warning(f"Email delivery attempt {attempt_num}: {status}, error={error}")
             return success, None, error
 
         success, result, error = await retry_with_backoff(
@@ -253,9 +256,7 @@ async def start_consumer() -> None:
         channel = await connection.channel()
 
         # Declare queues
-        payment_succeeded_queue = await channel.declare_queue(
-            "payment.succeeded", durable=True
-        )
+        payment_succeeded_queue = await channel.declare_queue("payment.succeeded", durable=True)
         payment_failed_queue = await channel.declare_queue("payment.failed", durable=True)
 
         logger.info("Queues declared: payment.succeeded, payment.failed")
@@ -278,4 +279,3 @@ async def start_consumer() -> None:
     except Exception as e:
         logger.error(f"Error starting consumer: {e}", exc_info=True)
         raise
-

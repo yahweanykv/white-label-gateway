@@ -23,7 +23,7 @@ class TestGatewayMerchantsRoutes:
     async def test_create_merchant_success(self, mock_client_class):
         """Test successful merchant creation."""
         from datetime import datetime
-        
+
         merchant_id = uuid4()
         now = datetime.utcnow()
         mock_response = MagicMock()
@@ -67,7 +67,7 @@ class TestGatewayMerchantsRoutes:
     async def test_get_merchant_success(self, mock_client_class):
         """Test successful merchant retrieval."""
         from datetime import datetime
-        
+
         merchant_id = uuid4()
         now = datetime.utcnow()
         mock_response = MagicMock()
@@ -159,6 +159,7 @@ class TestGatewayPaymentsRoutes:
         merchant_id = mock_merchant.merchant_id
         mock_response = MagicMock()
         from datetime import datetime
+
         now = datetime.utcnow()
         mock_response.json.return_value = {
             "payment_id": str(payment_id),
@@ -188,7 +189,9 @@ class TestGatewayPaymentsRoutes:
             return mock_merchant
 
         app = FastAPI()
-        app.include_router(payments_router, prefix="/api/v1/payments", dependencies=[Depends(get_current_merchant)])
+        app.include_router(
+            payments_router, prefix="/api/v1/payments", dependencies=[Depends(get_current_merchant)]
+        )
         client = TestClient(app)
 
         payment_request = {
@@ -210,6 +213,7 @@ class TestGatewayPaymentsRoutes:
         merchant_id = mock_merchant.merchant_id
         mock_response = MagicMock()
         from datetime import datetime
+
         now = datetime.utcnow()
         mock_response.json.return_value = {
             "payment_id": str(payment_id),
@@ -240,7 +244,9 @@ class TestGatewayPaymentsRoutes:
             return mock_merchant
 
         app = FastAPI()
-        app.include_router(payments_router, prefix="/api/v1/payments", dependencies=[Depends(get_current_merchant)])
+        app.include_router(
+            payments_router, prefix="/api/v1/payments", dependencies=[Depends(get_current_merchant)]
+        )
         client = TestClient(app)
 
         payment_request = {
@@ -263,6 +269,7 @@ class TestGatewayPaymentsRoutes:
         merchant_id = mock_merchant.merchant_id
         mock_response = MagicMock()
         from datetime import datetime
+
         now = datetime.utcnow()
         mock_response.json.return_value = {
             "payment_id": str(payment_id),
@@ -292,7 +299,9 @@ class TestGatewayPaymentsRoutes:
             return mock_merchant
 
         app = FastAPI()
-        app.include_router(payments_router, prefix="/api/v1/payments", dependencies=[Depends(get_current_merchant)])
+        app.include_router(
+            payments_router, prefix="/api/v1/payments", dependencies=[Depends(get_current_merchant)]
+        )
         client = TestClient(app)
 
         response = client.get(f"/api/v1/payments/{payment_id}")
@@ -304,7 +313,7 @@ class TestGatewayPaymentsRoutes:
     async def test_get_payment_not_found(self, mock_client_class, mock_merchant):
         """Test payment not found."""
         from httpx import HTTPStatusError
-        
+
         payment_id = uuid4()
         mock_response = MagicMock()
         mock_response.status_code = 404
@@ -324,7 +333,9 @@ class TestGatewayPaymentsRoutes:
             return mock_merchant
 
         app = FastAPI()
-        app.include_router(payments_router, prefix="/api/v1/payments", dependencies=[Depends(get_current_merchant)])
+        app.include_router(
+            payments_router, prefix="/api/v1/payments", dependencies=[Depends(get_current_merchant)]
+        )
         client = TestClient(app)
 
         response = client.get(f"/api/v1/payments/{payment_id}")
@@ -334,14 +345,16 @@ class TestGatewayPaymentsRoutes:
     @patch("gateway.api.payments.httpx.AsyncClient")
     @patch("gateway.api.payments.create_payment_log")
     @patch("gateway.api.payments.finalize_payment_log")
-    async def test_create_payment_service_error(self, mock_finalize, mock_create_log, mock_client_class, mock_merchant):
+    async def test_create_payment_service_error(
+        self, mock_finalize, mock_create_log, mock_client_class, mock_merchant
+    ):
         """Test payment creation with service error."""
         from httpx import HTTPStatusError
-        
+
         merchant_id = mock_merchant.merchant_id
         request_id = uuid4()
         mock_create_log.return_value = request_id
-        
+
         mock_response = MagicMock()
         mock_response.status_code = 500
         mock_response.text = "Internal server error"
@@ -360,7 +373,9 @@ class TestGatewayPaymentsRoutes:
             return mock_merchant
 
         app = FastAPI()
-        app.include_router(payments_router, prefix="/api/v1/payments", dependencies=[Depends(get_current_merchant)])
+        app.include_router(
+            payments_router, prefix="/api/v1/payments", dependencies=[Depends(get_current_merchant)]
+        )
         client = TestClient(app)
 
         payment_request = {
@@ -378,10 +393,12 @@ class TestGatewayPaymentsRoutes:
     @patch("gateway.api.payments.httpx.AsyncClient")
     @patch("gateway.api.payments.create_payment_log")
     @patch("gateway.api.payments.finalize_payment_log")
-    async def test_create_payment_request_error(self, mock_finalize, mock_create_log, mock_client_class, mock_merchant):
+    async def test_create_payment_request_error(
+        self, mock_finalize, mock_create_log, mock_client_class, mock_merchant
+    ):
         """Test payment creation with request error."""
         from httpx import RequestError
-        
+
         merchant_id = mock_merchant.merchant_id
         request_id = uuid4()
         mock_create_log.return_value = request_id
@@ -400,7 +417,9 @@ class TestGatewayPaymentsRoutes:
             return mock_merchant
 
         app = FastAPI()
-        app.include_router(payments_router, prefix="/api/v1/payments", dependencies=[Depends(get_current_merchant)])
+        app.include_router(
+            payments_router, prefix="/api/v1/payments", dependencies=[Depends(get_current_merchant)]
+        )
         client = TestClient(app)
 
         payment_request = {
@@ -419,7 +438,7 @@ class TestGatewayPaymentsRoutes:
     async def test_get_payment_service_error(self, mock_client_class, mock_merchant):
         """Test get payment with service error."""
         from httpx import HTTPStatusError
-        
+
         payment_id = uuid4()
         mock_response = MagicMock()
         mock_response.status_code = 500
@@ -439,7 +458,9 @@ class TestGatewayPaymentsRoutes:
             return mock_merchant
 
         app = FastAPI()
-        app.include_router(payments_router, prefix="/api/v1/payments", dependencies=[Depends(get_current_merchant)])
+        app.include_router(
+            payments_router, prefix="/api/v1/payments", dependencies=[Depends(get_current_merchant)]
+        )
         client = TestClient(app)
 
         response = client.get(f"/api/v1/payments/{payment_id}")
@@ -450,7 +471,7 @@ class TestGatewayPaymentsRoutes:
     async def test_get_payment_request_error(self, mock_client_class, mock_merchant):
         """Test get payment with request error."""
         from httpx import RequestError
-        
+
         payment_id = uuid4()
 
         mock_client = AsyncMock()
@@ -467,7 +488,9 @@ class TestGatewayPaymentsRoutes:
             return mock_merchant
 
         app = FastAPI()
-        app.include_router(payments_router, prefix="/api/v1/payments", dependencies=[Depends(get_current_merchant)])
+        app.include_router(
+            payments_router, prefix="/api/v1/payments", dependencies=[Depends(get_current_merchant)]
+        )
         client = TestClient(app)
 
         response = client.get(f"/api/v1/payments/{payment_id}")
@@ -550,7 +573,7 @@ class TestGatewayPaymentsRoutes:
         payment_id = uuid4()
         merchant_id = uuid4()
         now = datetime.utcnow()
-        
+
         # Mock merchant service response
         mock_merchant_response = MagicMock()
         mock_merchant_response.status_code = 200
@@ -584,7 +607,7 @@ class TestGatewayPaymentsRoutes:
         mock_client = AsyncMock()
         mock_client.__aenter__.return_value = mock_client
         mock_client.__aexit__.return_value = None
-        
+
         # First call for merchant service, second for payment service
         mock_client.get = AsyncMock(side_effect=[mock_merchant_response, mock_payment_response])
         mock_client_class.return_value = mock_client
@@ -625,7 +648,9 @@ class TestGatewayPaymentsRoutes:
         app.include_router(payments_router, prefix="/api/v1/payments")
         client = TestClient(app)
 
-        response = client.get(f"/api/v1/payments/{payment_id}", headers={"X-API-Key": "sk_test_123"})
+        response = client.get(
+            f"/api/v1/payments/{payment_id}", headers={"X-API-Key": "sk_test_123"}
+        )
         assert response.status_code == 401
         assert "Invalid API key" in response.json()["detail"]
 
@@ -654,8 +679,8 @@ class TestGatewayPaymentsRoutes:
         app.include_router(payments_router, prefix="/api/v1/payments")
         client = TestClient(app)
 
-        response = client.get(f"/api/v1/payments/{payment_id}", headers={"X-API-Key": "sk_test_123"})
+        response = client.get(
+            f"/api/v1/payments/{payment_id}", headers={"X-API-Key": "sk_test_123"}
+        )
         assert response.status_code == 401
         assert "Invalid API key" in response.json()["detail"]
-
-

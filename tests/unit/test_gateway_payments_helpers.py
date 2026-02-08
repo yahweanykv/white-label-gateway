@@ -156,4 +156,3 @@ def test_enrich_with_next_action_no_next_action(mock_merchant):
 
     enriched = _enrich_with_next_action(payment, mock_merchant)
     assert enriched == payment
-

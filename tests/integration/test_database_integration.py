@@ -134,4 +134,3 @@ async def test_merchant_domain_uniqueness(postgres_container):
             await session.commit()
 
     await engine.dispose()
-

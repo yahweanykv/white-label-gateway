@@ -67,7 +67,10 @@ async def get_current_merchant(
 
     from shared.utils.logger import setup_logger
     import os
-    logger = setup_logger(__name__, level="INFO", json_logs=os.getenv("JSON_LOGS", "false").lower() == "true")
+
+    logger = setup_logger(
+        __name__, level="INFO", json_logs=os.getenv("JSON_LOGS", "false").lower() == "true"
+    )
 
     # Try cache first (Redis)
     api_key_hash = hashlib.sha256(x_api_key.encode()).hexdigest()[:16]
@@ -146,4 +149,3 @@ async def get_current_merchant(
                 status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
                 detail="Merchant service unavailable",
             )
-

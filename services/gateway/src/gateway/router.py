@@ -51,4 +51,3 @@ async def get_current_user_info(
         "email": current_merchant.email,
         "status": current_merchant.status,
     }
-

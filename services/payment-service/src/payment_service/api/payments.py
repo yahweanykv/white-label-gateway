@@ -17,7 +17,12 @@ from payment_service.integrations import (
     perform_fraud_check,
     publish_payment_event,
 )
-from payment_service.repository import get_payment, list_payments_for_merchant, list_all_payments, save_payment
+from payment_service.repository import (
+    get_payment,
+    list_payments_for_merchant,
+    list_all_payments,
+    save_payment,
+)
 from shared.models.payment import (
     PaymentRequest,
     PaymentResponse,
@@ -37,7 +42,9 @@ def _should_use_mock_provider() -> bool:
     return settings.environment.lower() == "local" and "mock" in settings.payment_provider.lower()
 
 
-async def _process_real_payment(payment_request: PaymentRequest) -> PaymentResponse:  # pragma: no cover - placeholder for future
+async def _process_real_payment(
+    payment_request: PaymentRequest,
+) -> PaymentResponse:  # pragma: no cover - placeholder for future
     """Placeholder for future real provider integration."""
     now = datetime.utcnow()
     payment = PaymentResponse(
@@ -122,17 +129,17 @@ async def create_payment(
         currency=payment.currency,
         service="payment-service",
     ).inc()
-    
+
     payment_amount_total.labels(
         currency=payment.currency,
         service="payment-service",
     ).inc(float(payment.amount))
-    
+
     payment_processing_duration_seconds.labels(
         status=payment.status.value,
         service="payment-service",
     ).observe(duration)
-    
+
     if payment.status == PaymentStatus.REQUIRES_ACTION:
         three_ds_attempts_total.labels(
             status="initiated",
@@ -157,7 +164,7 @@ async def get_all_payments(
 ):
     """
     Get all payments, optionally filtered by date range.
-    
+
     For demo purposes only - in production this should require authentication.
 
     Args:
@@ -234,14 +241,14 @@ async def get_payment_endpoint(
                 status_code=status.HTTP_404_NOT_FOUND,
                 detail="Payment not found",
             )
-    
+
     # Verify that payment belongs to the authenticated merchant
     if payment.merchant_id != verified_merchant_id:
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
             detail="Payment does not belong to this merchant",
         )
-    
+
     return payment
 
 
@@ -271,13 +278,13 @@ async def complete_three_ds(
             status_code=status.HTTP_404_NOT_FOUND,
             detail="Payment not found",
         )
-    
+
     # Record 3DS completion metric
     three_ds_attempts_total.labels(
         status="completed",
         service="payment-service",
     ).inc()
-    
+
     # Update payment metrics
     payments_total.labels(
         status=PaymentStatus.SUCCEEDED.value,
@@ -301,4 +308,3 @@ async def complete_three_ds(
     )
 
     return payment
-

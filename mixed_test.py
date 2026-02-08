@@ -28,11 +28,14 @@ ERRORS = {
     "Get Payment": "ConnectionAbortedError(10053, 'Connection closed by remote host', ...)",
 }
 
+
 def main():
     print("=" * 110)
     print("Смешанный тест — mixed endpoints")
     print("=" * 110)
-    print(f"Duration: {DURATION}s | Target RPS: ~{TARGET_RPS:.1f} | Success rate: {SUCCESS_RATE*100:.2f}%")
+    print(
+        f"Duration: {DURATION}s | Target RPS: ~{TARGET_RPS:.1f} | Success rate: {SUCCESS_RATE*100:.2f}%"
+    )
     print("-" * 110)
 
     start = time.perf_counter()
@@ -86,10 +89,14 @@ def main():
         req_s = s["reqs"] / total_time
         fail_s = s["fails"] / total_time
         method = "GET " if "Health" in name or "Get" in name else "POST"
-        print(f"  {method:<7} {name:<18} {s['reqs']:>6}   {s['fails']:>4}({fail_pct:.2f}%)  |  {s['avg_ms']:>4}     {req_s:>6.1f}    {fail_s:>6.2f}")
+        print(
+            f"  {method:<7} {name:<18} {s['reqs']:>6}   {s['fails']:>4}({fail_pct:.2f}%)  |  {s['avg_ms']:>4}     {req_s:>6.1f}    {fail_s:>6.2f}"
+        )
     print("-" * 110)
     fail_pct = 100 - success_rate
-    print(f"          Aggregated          {TOTAL_REQUESTS:>6}   {FAILURES:>4}({fail_pct:.2f}%)  |    27     {actual_rps:>6.1f}    {FAILURES/total_time:>6.2f}")
+    print(
+        f"          Aggregated          {TOTAL_REQUESTS:>6}   {FAILURES:>4}({fail_pct:.2f}%)  |    27     {actual_rps:>6.1f}    {FAILURES/total_time:>6.2f}"
+    )
     print()
     print(f"  Total requests:  {TOTAL_REQUESTS:,}")
     print(f"  Successful:      {success_count:,} ({success_rate:.2f}%)")
@@ -107,6 +114,7 @@ def main():
             print(f"{n:>18}  {method} {name}: {ERRORS[name]}")
     print("-" * 110)
     print("=" * 110)
+
 
 if __name__ == "__main__":
     main()

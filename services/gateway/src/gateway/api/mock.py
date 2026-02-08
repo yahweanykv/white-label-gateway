@@ -95,4 +95,3 @@ async def mock_three_ds_complete(
         url=f"/mock-success?{query}",
         status_code=status.HTTP_303_SEE_OTHER,
     )
-

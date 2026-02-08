@@ -82,4 +82,3 @@ async def test_get_current_merchant_inactive():
         await get_current_merchant(x_api_key=api_key, db=mock_db)
 
     assert exc_info.value.status_code == 401
-

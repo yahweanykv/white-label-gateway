@@ -87,4 +87,3 @@ async def send_webhook(
         error_msg = f"Unexpected error sending webhook to {url}: {str(e)}"
         logger.error(error_msg)
         return False, None, error_msg
-

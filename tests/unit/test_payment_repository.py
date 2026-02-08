@@ -130,7 +130,7 @@ async def test_get_payment_not_found():
 async def test_list_payments_for_merchant():
     """Test listing payments for merchant."""
     from sqlalchemy import select
-    
+
     merchant_id = uuid4()
     payment1 = MagicMock(spec=PaymentORM)
     payment2 = MagicMock(spec=PaymentORM)
@@ -146,4 +146,3 @@ async def test_list_payments_for_merchant():
     assert payment1 in result
     assert payment2 in result
     session.execute.assert_called_once()
-

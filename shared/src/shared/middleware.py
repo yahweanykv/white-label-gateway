@@ -100,4 +100,3 @@ class PrometheusMiddleware(BaseHTTPMiddleware):
         # Replace numeric IDs
         path = re.sub(r"/\d+", "/{id}", path)
         return path
-

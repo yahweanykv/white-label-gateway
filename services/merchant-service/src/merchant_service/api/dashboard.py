@@ -34,9 +34,7 @@ async def get_payment_stats(merchant_id: str) -> dict:
     successful = sum(1 for p in payments if p.get("status") == "succeeded")
     pending = sum(1 for p in payments if p.get("status") in ["processing", "requires_action"])
     revenue = sum(
-        Decimal(str(p.get("amount", 0)))
-        for p in payments
-        if p.get("status") == "succeeded"
+        Decimal(str(p.get("amount", 0))) for p in payments if p.get("status") == "succeeded"
     )
 
     # Get currency from first successful payment, or default to USD
@@ -62,7 +60,7 @@ async def get_dashboard(
 ):
     """
     Get merchant dashboard with branding.
-    
+
     Can accept API key either via X-API-Key header or via api_key query parameter (for demo purposes).
 
     Args:
@@ -73,15 +71,15 @@ async def get_dashboard(
         HTML dashboard page
     """
     from sqlalchemy import select
-    
+
     # Try to get merchant from header first
     current_merchant = None
     x_api_key = (
-        request.headers.get("X-API-Key") or 
-        request.headers.get("x-api-key") or 
-        request.headers.get("X-Api-Key")
+        request.headers.get("X-API-Key")
+        or request.headers.get("x-api-key")
+        or request.headers.get("X-Api-Key")
     )
-    
+
     if x_api_key:
         try:
             result = await db.execute(
@@ -92,7 +90,7 @@ async def get_dashboard(
             current_merchant = result.scalar_one_or_none()
         except Exception as e:
             logger.warning(f"Error getting merchant from header: {e}")
-    
+
     # If no merchant from header auth, try query parameter
     if not current_merchant:
         api_key = request.query_params.get("api_key")
@@ -104,7 +102,7 @@ async def get_dashboard(
                     )
                 )
                 current_merchant = result.scalar_one_or_none()
-                
+
                 if not current_merchant:
                     raise HTTPException(
                         status_code=status.HTTP_401_UNAUTHORIZED,
@@ -114,7 +112,7 @@ async def get_dashboard(
                 raise
             except Exception as e:
                 logger.warning(f"Error getting merchant from query param: {e}")
-    
+
     if not current_merchant:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
@@ -340,4 +338,3 @@ async def get_dashboard(
     """
 
     return HTMLResponse(content=html_content)
-

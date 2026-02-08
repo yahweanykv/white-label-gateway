@@ -36,6 +36,7 @@ def app():
     app.dependency_overrides[get_db] = override_get_db
 
     import payment_service.api.payments as payments_module
+
     original_save = payments_module.save_payment
     original_get = payments_module.get_payment
     original_list = payments_module.list_payments_for_merchant
@@ -96,6 +97,7 @@ class TestPaymentServicePaymentsExtended:
     def test_create_payment_with_fraud_detected(self, client, monkeypatch):
         """Test payment creation with fraud detected."""
         import payment_service.api.payments as payments_module
+
         payments_module.settings.environment = "local"
         payments_module.settings.payment_provider = "mock_success"
 
@@ -122,6 +124,7 @@ class TestPaymentServicePaymentsExtended:
     def test_get_payments_by_merchant(self, client, monkeypatch):
         """Test getting payments by merchant ID."""
         import payment_service.api.payments as payments_module
+
         payments_module.settings.environment = "local"
         payments_module.settings.payment_provider = "mock_success"
 
@@ -210,4 +213,3 @@ class TestPaymentServicePaymentsExtended:
         data = response.json()
         assert data["status"] == "succeeded"
         assert data["requires_action"] is False
-

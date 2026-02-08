@@ -48,9 +48,7 @@ async def get_current_merchant(
 
     # Query merchant by API key
     result = await db.execute(
-        select(Merchant).where(
-            Merchant.api_keys.contains([x_api_key]), Merchant.is_active == True
-        )
+        select(Merchant).where(Merchant.api_keys.contains([x_api_key]), Merchant.is_active == True)
     )
     merchant = result.scalar_one_or_none()
 
@@ -61,4 +59,3 @@ async def get_current_merchant(
         )
 
     return merchant
-

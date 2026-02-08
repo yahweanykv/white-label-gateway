@@ -26,7 +26,9 @@ class Merchant(Base):
         index=True,
     )
     name: Mapped[str] = mapped_column(String(255), nullable=False, index=True)
-    domain: Mapped[Optional[str]] = mapped_column(String(255), nullable=True, unique=True, index=True)
+    domain: Mapped[Optional[str]] = mapped_column(
+        String(255), nullable=True, unique=True, index=True
+    )
     logo_url: Mapped[Optional[str]] = mapped_column(String(512), nullable=True)
     primary_color: Mapped[Optional[str]] = mapped_column(String(7), nullable=True)
     background_color: Mapped[Optional[str]] = mapped_column(String(7), nullable=True)
@@ -73,7 +75,9 @@ class Payment(Base):
     )
     transaction_id: Mapped[Optional[str]] = mapped_column(String(64), nullable=True)
     provider: Mapped[str] = mapped_column(String(64), nullable=False, default="mock")
-    fraud_risk_score: Mapped[Optional[Decimal]] = mapped_column(Numeric(precision=5, scale=2), nullable=True)
+    fraud_risk_score: Mapped[Optional[Decimal]] = mapped_column(
+        Numeric(precision=5, scale=2), nullable=True
+    )
     fraud_reason: Mapped[Optional[str]] = mapped_column(String(255), nullable=True)
     created_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), nullable=False, default=datetime.utcnow, index=True
@@ -97,13 +101,17 @@ class GatewayPaymentLog(Base):
         default=uuid4,
     )
     merchant_id: Mapped[UUID] = mapped_column(PGUUID(as_uuid=True), nullable=False, index=True)
-    payment_id: Mapped[Optional[UUID]] = mapped_column(PGUUID(as_uuid=True), nullable=True, index=True)
+    payment_id: Mapped[Optional[UUID]] = mapped_column(
+        PGUUID(as_uuid=True), nullable=True, index=True
+    )
     path: Mapped[str] = mapped_column(String(255), nullable=False)
     method: Mapped[str] = mapped_column(String(16), nullable=False)
     status_code: Mapped[Optional[int]] = mapped_column(Integer, nullable=True)
     request_payload: Mapped[Optional[dict[str, Any]]] = mapped_column(JSONB, nullable=True)
     response_payload: Mapped[Optional[dict[str, Any]]] = mapped_column(JSONB, nullable=True)
-    metadata_json: Mapped[Optional[dict[str, Any]]] = mapped_column("metadata", JSONB, nullable=True)
+    metadata_json: Mapped[Optional[dict[str, Any]]] = mapped_column(
+        "metadata", JSONB, nullable=True
+    )
     error_message: Mapped[Optional[str]] = mapped_column(String(512), nullable=True)
     created_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True),
@@ -133,5 +141,5 @@ class GatewayPaymentLog(Base):
         if payment_id:
             self.payment_id = payment_id
 
-__all__ = ["Merchant", "Payment", "GatewayPaymentLog"]
 
+__all__ = ["Merchant", "Payment", "GatewayPaymentLog"]

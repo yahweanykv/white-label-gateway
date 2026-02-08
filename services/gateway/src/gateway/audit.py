@@ -30,7 +30,7 @@ async def create_payment_log(
 ) -> UUID:
     """Persist initial gateway payment request metadata."""
     from uuid import uuid4
-    
+
     async def _create(session: AsyncSession):
         entry = GatewayPaymentLog(
             merchant_id=merchant_id,
@@ -81,4 +81,3 @@ async def finalize_payment_log(
     result = await _with_session(merchant_id, _update)
     if result is None:
         return
-

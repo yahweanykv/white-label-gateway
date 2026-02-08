@@ -23,10 +23,10 @@ def test_json_formatter_format():
         args=(),
         exc_info=None,
     )
-    
+
     result = formatter.format(record)
     data = json.loads(result)
-    
+
     assert data["level"] == "INFO"
     assert data["logger"] == "test"
     assert data["message"] == "Test message"
@@ -49,10 +49,10 @@ def test_json_formatter_with_exception():
             args=(),
             exc_info=sys.exc_info(),
         )
-    
+
     result = formatter.format(record)
     data = json.loads(result)
-    
+
     assert data["level"] == "ERROR"
     assert "exception" in data
 
@@ -70,10 +70,10 @@ def test_json_formatter_with_extra_fields():
         exc_info=None,
     )
     record.extra_fields = {"key": "value"}
-    
+
     result = formatter.format(record)
     data = json.loads(result)
-    
+
     assert data["key"] == "value"
 
 
@@ -92,10 +92,10 @@ def test_json_formatter_with_context():
     record.request_id = "req_123"
     record.merchant_id = "merchant_456"
     record.payment_id = "payment_789"
-    
+
     result = formatter.format(record)
     data = json.loads(result)
-    
+
     assert data["request_id"] == "req_123"
     assert data["merchant_id"] == "merchant_456"
     assert data["payment_id"] == "payment_789"
@@ -105,7 +105,7 @@ def test_structured_logger_debug():
     """Test structured logger debug method."""
     mock_logger = MagicMock(spec=logging.Logger)
     structured = StructuredLogger(mock_logger)
-    
+
     structured.debug("Debug message")
     mock_logger.debug.assert_called_once_with("Debug message")
 
@@ -114,7 +114,7 @@ def test_structured_logger_info():
     """Test structured logger info method."""
     mock_logger = MagicMock(spec=logging.Logger)
     structured = StructuredLogger(mock_logger)
-    
+
     structured.info("Info message")
     mock_logger.info.assert_called_once_with("Info message")
 
@@ -123,7 +123,7 @@ def test_structured_logger_warning():
     """Test structured logger warning method."""
     mock_logger = MagicMock(spec=logging.Logger)
     structured = StructuredLogger(mock_logger)
-    
+
     structured.warning("Warning message")
     mock_logger.warning.assert_called_once_with("Warning message")
 
@@ -132,7 +132,7 @@ def test_structured_logger_error():
     """Test structured logger error method."""
     mock_logger = MagicMock(spec=logging.Logger)
     structured = StructuredLogger(mock_logger)
-    
+
     structured.error("Error message")
     mock_logger.error.assert_called_once_with("Error message")
 
@@ -141,7 +141,7 @@ def test_structured_logger_critical():
     """Test structured logger critical method."""
     mock_logger = MagicMock(spec=logging.Logger)
     structured = StructuredLogger(mock_logger)
-    
+
     structured.critical("Critical message")
     mock_logger.critical.assert_called_once_with("Critical message")
 
@@ -150,7 +150,7 @@ def test_structured_logger_with_context():
     """Test structured logger with context."""
     mock_logger = MagicMock(spec=logging.Logger)
     structured = StructuredLogger(mock_logger)
-    
+
     structured._log_with_context(
         logging.INFO,
         "Message",
@@ -158,7 +158,7 @@ def test_structured_logger_with_context():
         merchant_id="merchant_456",
         payment_id="payment_789",
     )
-    
+
     mock_logger.log.assert_called_once()
     call_kwargs = mock_logger.log.call_args[1]
     assert call_kwargs["extra"]["request_id"] == "req_123"
@@ -212,10 +212,9 @@ def test_setup_logger_idempotent():
     """Test that setup_logger is idempotent."""
     logger1 = setup_logger("test_logger")
     handler_count1 = len(logger1.handlers)
-    
+
     logger2 = setup_logger("test_logger")
     handler_count2 = len(logger2.handlers)
-    
+
     assert logger1 is logger2
     assert handler_count1 == handler_count2
-

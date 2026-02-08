@@ -45,7 +45,7 @@ async def test_get_current_merchant_success(mock_client_class, mock_get_redis):
     request.state = MagicMock()
 
     merchant = await get_current_merchant(request, x_api_key="sk_test_123")
-    
+
     assert merchant.merchant_id == merchant_id
     assert merchant.status == MerchantStatus.ACTIVE
     assert request.state.merchant_id == merchant_id
@@ -86,10 +86,10 @@ async def test_get_current_merchant_cache_hit(mock_get_redis):
 async def test_get_current_merchant_no_api_key():
     """Test getting current merchant without API key."""
     request = MagicMock(spec=Request)
-    
+
     with pytest.raises(HTTPException) as exc_info:
         await get_current_merchant(request, x_api_key=None)
-    
+
     assert exc_info.value.status_code == 401
     assert "X-API-Key" in exc_info.value.detail
 
@@ -109,10 +109,10 @@ async def test_get_current_merchant_not_found(mock_client_class, mock_get_redis)
     mock_client_class.return_value = mock_client
 
     request = MagicMock(spec=Request)
-    
+
     with pytest.raises(HTTPException) as exc_info:
         await get_current_merchant(request, x_api_key="invalid_key")
-    
+
     assert exc_info.value.status_code == 401
 
 
@@ -142,10 +142,10 @@ async def test_get_current_merchant_inactive(mock_client_class, mock_get_redis):
     mock_client_class.return_value = mock_client
 
     request = MagicMock(spec=Request)
-    
+
     with pytest.raises(HTTPException) as exc_info:
         await get_current_merchant(request, x_api_key="sk_test_123")
-    
+
     assert exc_info.value.status_code == 403
 
 
@@ -166,10 +166,10 @@ async def test_get_current_merchant_service_error(mock_client_class, mock_get_re
     mock_client_class.return_value = mock_client
 
     request = MagicMock(spec=Request)
-    
+
     with pytest.raises(HTTPException) as exc_info:
         await get_current_merchant(request, x_api_key="sk_test_123")
-    
+
     assert exc_info.value.status_code == 503
 
 
@@ -191,9 +191,8 @@ async def test_get_current_merchant_request_error(mock_client_class, mock_get_re
     mock_client_class.return_value = mock_client
 
     request = MagicMock(spec=Request)
-    
+
     with pytest.raises(HTTPException) as exc_info:
         await get_current_merchant(request, x_api_key="sk_test_123")
-    
-    assert exc_info.value.status_code == 503
 
+    assert exc_info.value.status_code == 503

@@ -17,7 +17,9 @@ from shared.middleware import PrometheusMiddleware
 from shared.metrics import get_metrics, service_health
 from fastapi.responses import Response
 
-logger = setup_logger(__name__, level=settings.log_level, json_logs=os.getenv("JSON_LOGS", "false").lower() == "true")
+logger = setup_logger(
+    __name__, level=settings.log_level, json_logs=os.getenv("JSON_LOGS", "false").lower() == "true"
+)
 
 
 @asynccontextmanager
@@ -136,8 +138,6 @@ if settings.rate_limit_enabled:
 app.add_middleware(TenantMiddleware)
 
 
-
-
 # Include routers
 app.include_router(router)
 
@@ -196,4 +196,3 @@ def main():
 
 if __name__ == "__main__":
     main()
-

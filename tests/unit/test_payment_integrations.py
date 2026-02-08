@@ -40,7 +40,7 @@ async def test_perform_fraud_check_success(mock_client_class):
     )
 
     result = await perform_fraud_check(payment_request)
-    
+
     assert result is not None
     assert result["is_fraud"] is False
     assert result["risk_score"] == 0.1
@@ -72,7 +72,7 @@ async def test_perform_fraud_check_fraud_detected(mock_client_class):
     )
 
     result = await perform_fraud_check(payment_request)
-    
+
     assert result is not None
     assert result["is_fraud"] is True
 
@@ -82,7 +82,7 @@ async def test_perform_fraud_check_fraud_detected(mock_client_class):
 async def test_perform_fraud_check_service_error(mock_client_class):
     """Test fraud check with service error."""
     from httpx import HTTPError
-    
+
     mock_client = AsyncMock()
     mock_client.__aenter__.return_value = mock_client
     mock_client.__aexit__.return_value = None
@@ -98,7 +98,7 @@ async def test_perform_fraud_check_service_error(mock_client_class):
     )
 
     result = await perform_fraud_check(payment_request)
-    
+
     assert result is None
 
 
@@ -107,7 +107,7 @@ async def test_perform_fraud_check_service_error(mock_client_class):
 async def test_notify_customer_success(mock_client_class):
     """Test successful customer notification."""
     from datetime import datetime
-    
+
     mock_response = MagicMock()
     mock_response.status_code = 200
 
@@ -129,7 +129,7 @@ async def test_notify_customer_success(mock_client_class):
     )
 
     await notify_customer(payment, "customer@example.com")
-    
+
     mock_client.post.assert_called_once()
 
 
@@ -137,7 +137,7 @@ async def test_notify_customer_success(mock_client_class):
 async def test_notify_customer_no_email():
     """Test customer notification without email."""
     from datetime import datetime
-    
+
     payment = PaymentResponse(
         payment_id=uuid4(),
         merchant_id=uuid4(),
@@ -158,18 +158,18 @@ async def test_notify_customer_no_email():
 async def test_publish_payment_event_succeeded(mock_connect):
     """Test publishing succeeded payment event."""
     from datetime import datetime
-    
+
     mock_connection = AsyncMock()
     mock_channel = AsyncMock()
     mock_queue = MagicMock()
     mock_queue.name = "payment.succeeded"
-    
+
     mock_connection.__aenter__.return_value = mock_connection
     mock_connection.__aexit__.return_value = None
     mock_connection.channel = AsyncMock(return_value=mock_channel)
     mock_channel.declare_queue = AsyncMock(return_value=mock_queue)
     mock_channel.default_exchange.publish = AsyncMock()
-    
+
     mock_connect.return_value = mock_connection
 
     payment = PaymentResponse(
@@ -184,7 +184,7 @@ async def test_publish_payment_event_succeeded(mock_connect):
     )
 
     await publish_payment_event(payment, customer_email="customer@example.com", metadata={})
-    
+
     mock_channel.default_exchange.publish.assert_called_once()
 
 
@@ -193,18 +193,18 @@ async def test_publish_payment_event_succeeded(mock_connect):
 async def test_publish_payment_event_failed(mock_connect):
     """Test publishing failed payment event."""
     from datetime import datetime
-    
+
     mock_connection = AsyncMock()
     mock_channel = AsyncMock()
     mock_queue = MagicMock()
     mock_queue.name = "payment.failed"
-    
+
     mock_connection.__aenter__.return_value = mock_connection
     mock_connection.__aexit__.return_value = None
     mock_connection.channel = AsyncMock(return_value=mock_channel)
     mock_channel.declare_queue = AsyncMock(return_value=mock_queue)
     mock_channel.default_exchange.publish = AsyncMock()
-    
+
     mock_connect.return_value = mock_connection
 
     payment = PaymentResponse(
@@ -219,7 +219,7 @@ async def test_publish_payment_event_failed(mock_connect):
     )
 
     await publish_payment_event(payment, customer_email="customer@example.com", metadata={})
-    
+
     mock_channel.default_exchange.publish.assert_called_once()
 
 
@@ -228,7 +228,7 @@ async def test_publish_payment_event_failed(mock_connect):
 async def test_publish_payment_event_processing(mock_connect):
     """Test publishing processing payment event (should not publish)."""
     from datetime import datetime
-    
+
     payment = PaymentResponse(
         payment_id=uuid4(),
         merchant_id=uuid4(),
@@ -241,7 +241,6 @@ async def test_publish_payment_event_processing(mock_connect):
     )
 
     await publish_payment_event(payment, customer_email="customer@example.com", metadata={})
-    
+
     # Should not call connect_robust for processing status
     mock_connect.assert_not_called()
-

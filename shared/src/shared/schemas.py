@@ -81,9 +81,7 @@ class HealthCheckResponse(BaseModel):
 
     status: str = Field(..., description="Service status")
     version: Optional[str] = Field(default=None, description="Service version")
-    checks: Optional[dict[str, bool]] = Field(
-        default=None, description="Individual service checks"
-    )
+    checks: Optional[dict[str, bool]] = Field(default=None, description="Individual service checks")
 
     class Config:
         """Pydantic config."""
@@ -113,4 +111,3 @@ class MessageResponse(BaseModel):
                 "message": "Operation completed successfully",
             }
         }
-

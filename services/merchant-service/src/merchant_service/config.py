@@ -24,10 +24,7 @@ class Settings(BaseSettings):
 
     # Database
     database_url: str = Field(
-        default=(
-            "postgresql+asyncpg://merchant_user:merchant_pass"
-            "@localhost:5432/merchant_db"
-        ),
+        default=("postgresql+asyncpg://merchant_user:merchant_pass" "@localhost:5432/merchant_db"),
         description="Database connection URL",
     )
 
@@ -57,4 +54,3 @@ class Settings(BaseSettings):
 
 
 settings = Settings()
-

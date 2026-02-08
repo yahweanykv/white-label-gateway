@@ -207,4 +207,3 @@ def get_provider(name: str) -> BaseMockProvider:
     """Return provider by name."""
     normalized = name.lower()
     return MOCK_PROVIDERS.get(normalized, MOCK_PROVIDERS["mock_success"])
-

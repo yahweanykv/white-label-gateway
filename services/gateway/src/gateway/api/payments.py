@@ -15,7 +15,9 @@ from shared.models.payment import PaymentRequest, PaymentResponse
 from shared.utils.logger import setup_logger
 import os
 
-logger = setup_logger(__name__, level="INFO", json_logs=os.getenv("JSON_LOGS", "false").lower() == "true")
+logger = setup_logger(
+    __name__, level="INFO", json_logs=os.getenv("JSON_LOGS", "false").lower() == "true"
+)
 
 router = APIRouter()
 
@@ -29,11 +31,12 @@ DEFAULT_BACKGROUND_COLOR = "#EEF2FF"
 async def options_payment():
     """
     Handle CORS preflight requests for payment endpoints.
-    
+
     This endpoint is explicitly defined to ensure OPTIONS requests
     are handled before dependencies are called.
     """
     from fastapi.responses import Response
+
     return Response(status_code=200)
 
 
@@ -93,6 +96,7 @@ async def create_payment(
         )
     except Exception as e:
         from uuid import uuid4
+
         logger.warning(f"Audit log failed, continuing: {e}")
         request_id = uuid4()
 
@@ -109,7 +113,7 @@ async def create_payment(
     payment_service_url = f"{settings.payment_service_url}/api/v1/payments"
     logger.info(f"Forwarding payment request to: {payment_service_url}")
     logger.debug(f"Payment data: {payment_data}, Headers: {headers}")
-    
+
     async with httpx.AsyncClient(follow_redirects=True, timeout=30.0) as client:
         try:
             response = await client.post(
@@ -149,12 +153,15 @@ async def create_payment(
             )
         except httpx.RequestError as e:
             error_msg = f"Payment service request error: {type(e).__name__}: {str(e)}"
-            logger.error(error_msg, extra={
-                "payment_service_url": payment_service_url,
-                "error_type": type(e).__name__,
-                "error": str(e),
-                "merchant_id": str(current_merchant.merchant_id)
-            })
+            logger.error(
+                error_msg,
+                extra={
+                    "payment_service_url": payment_service_url,
+                    "error_type": type(e).__name__,
+                    "error": str(e),
+                    "merchant_id": str(current_merchant.merchant_id),
+                },
+            )
             try:
                 await finalize_payment_log(
                     merchant_id=current_merchant.merchant_id,
@@ -178,7 +185,7 @@ async def get_payment(
 ):
     """
     Get payment by ID.
-    
+
     Can accept API key either via X-API-Key header or via api_key query parameter (for demo purposes).
 
     Args:
@@ -190,20 +197,22 @@ async def get_payment(
     """
     # Try to get API key from header first
     x_api_key = (
-        request.headers.get("X-API-Key") or 
-        request.headers.get("x-api-key") or 
-        request.headers.get("X-Api-Key")
+        request.headers.get("X-API-Key")
+        or request.headers.get("x-api-key")
+        or request.headers.get("X-Api-Key")
     )
-    
+
     # If no API key from header, try query parameter
     if not x_api_key:
         x_api_key = request.query_params.get("api_key")
         if x_api_key:
             logger.info(f"Got API key from query parameter: {x_api_key[:20]}...")
-    
+
     # Log for debugging
-    logger.info(f"Request to get payment {payment_id}, API key present: {bool(x_api_key)}, query params: {dict(request.query_params)}")
-    
+    logger.info(
+        f"Request to get payment {payment_id}, API key present: {bool(x_api_key)}, query params: {dict(request.query_params)}"
+    )
+
     if not x_api_key:
         logger.warning(f"No API key found in headers or query params for payment {payment_id}")
         raise HTTPException(
@@ -211,7 +220,7 @@ async def get_payment(
             detail="X-API-Key header or api_key query parameter is required",
             headers={"WWW-Authenticate": "ApiKey"},
         )
-    
+
     # Get merchant to verify and get merchant_id
     merchant_url = f"{settings.merchant_service_url}/api/v1/merchants/by-api-key"
     async with httpx.AsyncClient(timeout=10.0) as client:
@@ -229,6 +238,7 @@ async def get_payment(
             response.raise_for_status()
             merchant_data = response.json()
             from shared.models.merchant import Merchant
+
             current_merchant = Merchant(**merchant_data)
         except httpx.HTTPStatusError as e:
             if e.response.status_code == 401 or e.response.status_code == 404:
@@ -245,7 +255,7 @@ async def get_payment(
                 status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
                 detail=f"Merchant service unavailable: {str(e)}",
             )
-    
+
     headers = {"X-API-Key": x_api_key}
 
     async with httpx.AsyncClient(follow_redirects=True) as client:
@@ -257,7 +267,7 @@ async def get_payment(
             )
             response.raise_for_status()
             payment = PaymentResponse(**response.json())
-            
+
             # Enrich payment with merchant branding if merchant is available
             if current_merchant:
                 return _enrich_with_next_action(payment, current_merchant)
@@ -277,4 +287,3 @@ async def get_payment(
                 status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
                 detail=f"Payment service unavailable: {str(e)}",
             )
-

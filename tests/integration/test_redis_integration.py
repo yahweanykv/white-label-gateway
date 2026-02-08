@@ -13,9 +13,7 @@ async def test_redis_connection(redis_container):
     # Parse URL to get host and port
     import redis.asyncio as aioredis
 
-    redis_client = aioredis.from_url(
-        f"redis://{host}:{port}", decode_responses=True
-    )
+    redis_client = aioredis.from_url(f"redis://{host}:{port}", decode_responses=True)
 
     # Test basic operations
     await redis_client.set("test_key", "test_value")
@@ -37,9 +35,7 @@ async def test_redis_rate_limiting(redis_container):
     # Get host and port from container
     host = redis_container.get_container_host_ip()
     port = redis_container.get_exposed_port(6379)
-    redis_client = aioredis.from_url(
-        f"redis://{host}:{port}", decode_responses=True
-    )
+    redis_client = aioredis.from_url(f"redis://{host}:{port}", decode_responses=True)
 
     # Simulate rate limiting
     key = "rate_limit:merchant_123"
@@ -61,4 +57,3 @@ async def test_redis_rate_limiting(redis_container):
 
     await redis_client.delete(key)
     await redis_client.close()
-

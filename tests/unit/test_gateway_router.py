@@ -30,7 +30,7 @@ class TestGatewayRouter:
     async def test_get_current_user_info(self):
         """Test get current user info endpoint."""
         from gateway.deps import get_current_merchant
-        
+
         now = datetime.utcnow()
         mock_merchant = Merchant(
             merchant_id=uuid4(),

@@ -138,4 +138,3 @@ def setup_logger(
         logger.addHandler(handler)
 
     return logger  # pragma: no cover - simple return
-

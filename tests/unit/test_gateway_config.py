@@ -14,7 +14,7 @@ def test_settings_defaults(monkeypatch):
     monkeypatch.delenv("GATEWAY_HOST", raising=False)
     monkeypatch.delenv("GATEWAY_PORT", raising=False)
     monkeypatch.delenv("GATEWAY_ENV", raising=False)
-    
+
     settings = Settings()
     assert settings.host == "0.0.0.0"
     assert settings.port == 8000
@@ -69,9 +69,8 @@ def test_settings_from_env(monkeypatch):
     monkeypatch.setenv("GATEWAY_HOST", "127.0.0.1")
     monkeypatch.setenv("GATEWAY_PORT", "9000")
     monkeypatch.setenv("GATEWAY_ENV", "production")
-    
+
     settings = Settings()
     assert settings.host == "127.0.0.1"
     assert settings.port == 9000
     assert settings.env == "production"
-

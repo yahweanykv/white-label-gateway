@@ -145,4 +145,3 @@ async def test_get_dashboard_with_defaults(mock_get_stats, client):
     response = client.get("/api/v1/dashboard", headers={"X-API-Key": "sk_test_456"})
     assert response.status_code == 200
     assert "#4F46E5" in response.text  # default primary color
-

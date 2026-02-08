@@ -212,4 +212,3 @@ class TestPaymentModels:
         )
         assert payment.requires_action is True
         assert payment.next_action == {"type": "redirect", "path": "/mock-3ds"}
-

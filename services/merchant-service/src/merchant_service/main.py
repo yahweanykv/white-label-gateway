@@ -19,7 +19,9 @@ from shared.middleware import PrometheusMiddleware
 from shared.metrics import get_metrics, service_health
 from sqlalchemy import select
 
-logger = setup_logger(__name__, level=settings.log_level, json_logs=os.getenv("JSON_LOGS", "false").lower() == "true")
+logger = setup_logger(
+    __name__, level=settings.log_level, json_logs=os.getenv("JSON_LOGS", "false").lower() == "true"
+)
 
 
 async def init_database():
@@ -186,18 +188,23 @@ from fastapi import Request as FastAPIRequest
 from fastapi.exceptions import RequestValidationError
 from fastapi.responses import JSONResponse
 
+
 @app.exception_handler(RequestValidationError)
 async def validation_exception_handler(request: FastAPIRequest, exc: RequestValidationError):
     """Handle validation errors with detailed logging."""
     from shared.utils.logger import setup_logger
     import os
-    logger = setup_logger(__name__, level="INFO", json_logs=os.getenv("JSON_LOGS", "false").lower() == "true")
+
+    logger = setup_logger(
+        __name__, level="INFO", json_logs=os.getenv("JSON_LOGS", "false").lower() == "true"
+    )
     logger.error(f"Validation error on {request.url.path}: {exc.errors()}")
     logger.error(f"Request headers: {dict(request.headers)}")
     return JSONResponse(
         status_code=422,
         content={"detail": exc.errors(), "body": exc.body},
     )
+
 
 # Include routers
 app.include_router(router, prefix="/api/v1")
@@ -240,4 +247,3 @@ def main():
 
 if __name__ == "__main__":
     main()
-

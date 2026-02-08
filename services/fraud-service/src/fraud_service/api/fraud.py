@@ -65,4 +65,3 @@ async def check_fraud(fraud_check_request: FraudCheckRequest):
         risk_score=risk_score,
         reason="Fraud check completed" if not is_fraud else "High risk score detected",
     )
-

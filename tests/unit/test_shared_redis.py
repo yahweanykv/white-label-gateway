@@ -215,6 +215,7 @@ async def test_make_key(redis_client):
 async def test_make_key_with_tenant(redis_client):
     """Test creating Redis key with tenant ID."""
     from uuid import uuid4
+
     tenant_id = uuid4()
     key = redis_client.make_key("payment", "123", tenant_id=tenant_id)
     assert f"tenant:{tenant_id}" in key
@@ -257,4 +258,3 @@ async def test_disconnect(redis_client):
 
     assert redis_client.client is None
     mock_redis.close.assert_called_once()
-

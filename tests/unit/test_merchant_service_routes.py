@@ -134,6 +134,7 @@ class TestMerchantServiceRoutes:
     async def test_get_merchant_by_id_not_found(self, client):
         """Test getting non-existent merchant by ID."""
         from uuid import uuid4
+
         merchant_id = uuid4()
         response = client.get(f"/api/v1/merchants/{merchant_id}")
         assert response.status_code == 404
@@ -155,7 +156,9 @@ class TestMerchantServiceRoutes:
             "name": "Updated Merchant Name",
             "primary_color": "#FF0000",
         }
-        response = client.patch("/api/v1/merchants/me", json=update_data, headers={"X-API-Key": api_key})
+        response = client.patch(
+            "/api/v1/merchants/me", json=update_data, headers={"X-API-Key": api_key}
+        )
         assert response.status_code == 200
         data = response.json()
         assert data["name"] == "Updated Merchant Name"
@@ -183,7 +186,9 @@ class TestMerchantServiceRoutes:
         update_data = {
             "domain": "first.example.com",
         }
-        response = client.patch("/api/v1/merchants/me", json=update_data, headers={"X-API-Key": api_key2})
+        response = client.patch(
+            "/api/v1/merchants/me", json=update_data, headers={"X-API-Key": api_key2}
+        )
         assert response.status_code == 409
 
     @pytest.mark.asyncio
@@ -252,7 +257,9 @@ class TestMerchantServiceRoutes:
         update_data = {
             "name": "Updated Name Only",
         }
-        response = client.patch("/api/v1/merchants/me", json=update_data, headers={"X-API-Key": api_key})
+        response = client.patch(
+            "/api/v1/merchants/me", json=update_data, headers={"X-API-Key": api_key}
+        )
         assert response.status_code == 200
         data = response.json()
         assert data["name"] == "Updated Name Only"
@@ -274,7 +281,9 @@ class TestMerchantServiceRoutes:
         update_data = {
             "domain": "samedomain.example.com",
         }
-        response = client.patch("/api/v1/merchants/me", json=update_data, headers={"X-API-Key": api_key})
+        response = client.patch(
+            "/api/v1/merchants/me", json=update_data, headers={"X-API-Key": api_key}
+        )
         assert response.status_code == 200
 
     @pytest.mark.asyncio
@@ -293,4 +302,3 @@ class TestMerchantServiceRoutes:
         # Deactivate merchant (would need to update is_active in DB)
         # For now, just test that inactive merchants are filtered
         # This would require direct DB access in test
-

@@ -47,18 +47,20 @@ def client(app, db_session):
     async def override_get_current_merchant(x_api_key: str = None):
         if not x_api_key:
             from fastapi import HTTPException, status
+
             raise HTTPException(
                 status_code=status.HTTP_401_UNAUTHORIZED,
                 detail="X-API-Key header is required",
             )
         result = await db_session.execute(
-            __import__("sqlalchemy").select(Merchant).where(
-                Merchant.api_keys.contains([x_api_key]), Merchant.is_active == True
-            )
+            __import__("sqlalchemy")
+            .select(Merchant)
+            .where(Merchant.api_keys.contains([x_api_key]), Merchant.is_active == True)
         )
         merchant = result.scalar_one_or_none()
         if not merchant:
             from fastapi import HTTPException, status
+
             raise HTTPException(
                 status_code=status.HTTP_401_UNAUTHORIZED,
                 detail="Invalid API key",
@@ -77,7 +79,7 @@ class TestMerchantServiceMerchantsExtended:
         """Test API key generation."""
         key1 = generate_api_key()
         key2 = generate_api_key()
-        
+
         assert key1.startswith("sk_live_")
         assert key2.startswith("sk_live_")
         assert key1 != key2  # Should be different
@@ -114,7 +116,9 @@ class TestMerchantServiceMerchantsExtended:
             "logo_url": "https://example.com/new-logo.png",
             "webhook_url": "https://example.com/webhook",
         }
-        response = client.patch("/api/v1/merchants/me", json=update_data, headers={"X-API-Key": api_key})
+        response = client.patch(
+            "/api/v1/merchants/me", json=update_data, headers={"X-API-Key": api_key}
+        )
         assert response.status_code == 200
         data = response.json()
         assert data["logo_url"] == "https://example.com/new-logo.png"
@@ -137,7 +141,9 @@ class TestMerchantServiceMerchantsExtended:
         update_data = {
             "primary_color": None,
         }
-        response = client.patch("/api/v1/merchants/me", json=update_data, headers={"X-API-Key": api_key})
+        response = client.patch(
+            "/api/v1/merchants/me", json=update_data, headers={"X-API-Key": api_key}
+        )
         assert response.status_code == 200
         # None values should not update the field
         data = response.json()
@@ -158,7 +164,10 @@ class TestMerchantServiceMerchantsExtended:
 
         # Deactivate merchant
         from sqlalchemy import select
-        result = await client.app.dependency_overrides[__import__("merchant_service.deps").get_db]().__anext__()
+
+        result = await client.app.dependency_overrides[
+            __import__("merchant_service.deps").get_db
+        ]().__anext__()
         merchant = await result.execute(select(Merchant).where(Merchant.id == merchant_id))
         merchant_obj = merchant.scalar_one()
         merchant_obj.is_active = False
@@ -167,4 +176,3 @@ class TestMerchantServiceMerchantsExtended:
         # Try to get by API key (should fail)
         response = client.get("/api/v1/merchants/by-api-key", headers={"X-API-Key": api_key})
         assert response.status_code == 404
-

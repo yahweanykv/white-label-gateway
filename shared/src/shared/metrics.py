@@ -112,4 +112,3 @@ service_health = Gauge(
 def get_metrics():
     """Get Prometheus metrics in text format."""
     return generate_latest(REGISTRY)
-

@@ -145,4 +145,3 @@ def init_db(settings: "DatabaseSettings") -> Database:
     global db
     db = Database(settings)
     return db
-

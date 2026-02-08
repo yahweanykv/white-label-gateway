@@ -19,7 +19,6 @@ from merchant_service.schemas import (
 )
 
 
-
 router = APIRouter()
 
 
@@ -50,9 +49,7 @@ async def create_merchant(
     """
     # Check if domain already exists
     if merchant_create.domain:
-        result = await db.execute(
-            select(Merchant).where(Merchant.domain == merchant_create.domain)
-        )
+        result = await db.execute(select(Merchant).where(Merchant.domain == merchant_create.domain))
         existing = result.scalar_one_or_none()
         if existing:
             raise HTTPException(
@@ -138,21 +135,28 @@ async def get_merchant_by_api_key(
     # Добавить логирование
     from shared.utils.logger import setup_logger
     import os
-    logger = setup_logger(__name__, level="INFO", json_logs=os.getenv("JSON_LOGS", "false").lower() == "true")
-    
+
+    logger = setup_logger(
+        __name__, level="INFO", json_logs=os.getenv("JSON_LOGS", "false").lower() == "true"
+    )
+
     # Получить заголовок напрямую из request (избегаем проблем с валидацией FastAPI)
     all_headers = dict(request.headers)
     logger.info(f"Received /by-api-key request. Headers keys: {list(all_headers.keys())}")
-    
+
     # Попробовать получить заголовок в разных регистрах
     x_api_key = (
-        request.headers.get("X-API-Key") or 
-        request.headers.get("x-api-key") or 
-        request.headers.get("X-Api-Key")
+        request.headers.get("X-API-Key")
+        or request.headers.get("x-api-key")
+        or request.headers.get("X-Api-Key")
     )
-    
-    logger.info(f"X-API-Key from headers: {x_api_key[:20]}..." if x_api_key and len(x_api_key) > 20 else f"X-API-Key: {x_api_key}")
-    
+
+    logger.info(
+        f"X-API-Key from headers: {x_api_key[:20]}..."
+        if x_api_key and len(x_api_key) > 20
+        else f"X-API-Key: {x_api_key}"
+    )
+
     if not x_api_key:
         logger.error("X-API-Key header is missing")
         raise HTTPException(
@@ -160,13 +164,11 @@ async def get_merchant_by_api_key(
             detail="X-API-Key header is required",
             headers={"WWW-Authenticate": "ApiKey"},
         )
-    
+
     from sqlalchemy import select
 
     result = await db.execute(
-        select(Merchant).where(
-            Merchant.api_keys.contains([x_api_key]), Merchant.is_active == True
-        )
+        select(Merchant).where(Merchant.api_keys.contains([x_api_key]), Merchant.is_active == True)
     )
     merchant = result.scalar_one_or_none()
 
@@ -199,7 +201,7 @@ async def get_all_merchants(
 ):
     """
     Get all merchants.
-    
+
     For demo purposes only - in production this should require authentication.
 
     Args:
@@ -210,7 +212,7 @@ async def get_all_merchants(
     """
     result = await db.execute(select(Merchant).order_by(Merchant.created_at.desc()))
     merchants = result.scalars().all()
-    
+
     return [
         MerchantResponse(
             id=merchant.id,
@@ -313,4 +315,3 @@ async def update_current_merchant(
         created_at=current_merchant.created_at,
         updated_at=current_merchant.updated_at,
     )
-

@@ -229,4 +229,3 @@ def init_redis(settings: "RedisSettings") -> RedisClient:
     global redis_client
     redis_client = RedisClient(settings)
     return redis_client
-

@@ -95,6 +95,7 @@ class TestPaymentServiceRoutes:
         monkeypatch.setenv("PAYMENT_PROVIDER", "mock_success")
         # Override settings to ensure mock provider is used
         import payment_service.api.payments as payments_module
+
         payments_module.settings.environment = "local"
         payments_module.settings.payment_provider = "mock_success"
 
@@ -121,6 +122,7 @@ class TestPaymentServiceRoutes:
         monkeypatch.setenv("PAYMENT_PROVIDER", "mock_failed")
         # Override settings to ensure mock provider is used
         import payment_service.api.payments as payments_module
+
         payments_module.settings.environment = "local"
         payments_module.settings.payment_provider = "mock_failed"
 
@@ -144,6 +146,7 @@ class TestPaymentServiceRoutes:
         monkeypatch.setenv("PAYMENT_PROVIDER", "mock_3ds")
         # Override settings to ensure mock provider is used
         import payment_service.api.payments as payments_module
+
         payments_module.settings.environment = "local"
         payments_module.settings.payment_provider = "mock_3ds"
 
@@ -169,6 +172,7 @@ class TestPaymentServiceRoutes:
         monkeypatch.setenv("PAYMENT_PROVIDER", "mock_success")
         # Override settings to ensure mock provider is used
         import payment_service.api.payments as payments_module
+
         payments_module.settings.environment = "local"
         payments_module.settings.payment_provider = "mock_success"
 
@@ -203,6 +207,7 @@ class TestPaymentServiceRoutes:
         monkeypatch.setenv("PAYMENT_PROVIDER", "mock_3ds")
         # Override settings to ensure mock provider is used
         import payment_service.api.payments as payments_module
+
         payments_module.settings.environment = "local"
         payments_module.settings.payment_provider = "mock_3ds"
 
@@ -237,6 +242,7 @@ class TestPaymentServiceRoutes:
         monkeypatch.setenv("ENVIRONMENT", "local")
         monkeypatch.setenv("PAYMENT_PROVIDER", "mock_success")
         import payment_service.api.payments as payments_module
+
         payments_module.settings.environment = "local"
         payments_module.settings.payment_provider = "mock_success"
 
@@ -251,16 +257,20 @@ class TestPaymentServiceRoutes:
 
         # Mock verify_merchant_api_key to return merchant_id
         from payment_service.deps import verify_merchant_api_key
+
         original_verify = verify_merchant_api_key
 
         async def mock_verify():
             return merchant_id
 
         import payment_service.api.payments as pm
+
         pm.verify_merchant_api_key = mock_verify
 
         try:
-            response = client.post("/api/v1/payments", json=payment_request, headers={"X-API-Key": "sk_test"})
+            response = client.post(
+                "/api/v1/payments", json=payment_request, headers={"X-API-Key": "sk_test"}
+            )
             assert response.status_code == 403
             assert "does not match" in response.json()["detail"].lower()
         finally:
@@ -276,6 +286,7 @@ class TestPaymentServiceRoutes:
             return []
 
         import payment_service.api.payments as pm
+
         original_list = pm.list_all_payments
         pm.list_all_payments = mock_list_all_payments
 
@@ -288,10 +299,12 @@ class TestPaymentServiceRoutes:
 
     def test_get_all_payments_with_date_filter(self, client, monkeypatch):
         """Test getting all payments with date filter."""
+
         async def mock_list_all_payments(session, date_from=None, date_to=None):
             return []
 
         import payment_service.api.payments as pm
+
         original_list = pm.list_all_payments
         pm.list_all_payments = mock_list_all_payments
 
@@ -310,6 +323,7 @@ class TestPaymentServiceRoutes:
             return []
 
         import payment_service.api.payments as pm
+
         original_list = pm.list_payments_for_merchant
         pm.list_payments_for_merchant = mock_list_payments_for_merchant
 
@@ -358,7 +372,9 @@ class TestPaymentServiceRoutes:
         pm.verify_merchant_api_key = mock_verify
 
         try:
-            response = client.get(f"/api/v1/payments/{payment_id}", headers={"X-API-Key": "sk_test"})
+            response = client.get(
+                f"/api/v1/payments/{payment_id}", headers={"X-API-Key": "sk_test"}
+            )
             assert response.status_code == 200
             assert response.json()["payment_id"] == str(payment_id)
         finally:
@@ -398,10 +414,11 @@ class TestPaymentServiceRoutes:
         pm.verify_merchant_api_key = mock_verify
 
         try:
-            response = client.get(f"/api/v1/payments/{payment_id}", headers={"X-API-Key": "sk_test"})
+            response = client.get(
+                f"/api/v1/payments/{payment_id}", headers={"X-API-Key": "sk_test"}
+            )
             assert response.status_code == 403
             assert "does not belong" in response.json()["detail"].lower()
         finally:
             pm.verify_merchant_api_key = original_verify
             payment_store._store.pop(payment_id, None)
-

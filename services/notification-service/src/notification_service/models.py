@@ -48,4 +48,3 @@ class DeliveryAttempt(BaseModel):
     timestamp: datetime = Field(default_factory=datetime.utcnow, description="Attempt timestamp")
     response_code: Optional[int] = Field(None, description="HTTP response code for webhooks")
     response_body: Optional[str] = Field(None, description="Response body for webhooks")
-

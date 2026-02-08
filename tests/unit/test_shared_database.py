@@ -12,6 +12,7 @@ from shared.settings import DatabaseSettings
 
 def test_base_tablename():
     """Test Base class table name generation."""
+
     class TestModel(Base):
         pass
 
@@ -21,9 +22,7 @@ def test_base_tablename():
 @pytest.fixture
 def db_settings():
     """Create database settings for testing."""
-    return DatabaseSettings(
-        database_url="postgresql+asyncpg://user:pass@localhost:5432/testdb"
-    )
+    return DatabaseSettings(database_url="postgresql+asyncpg://user:pass@localhost:5432/testdb")
 
 
 @pytest.fixture
@@ -54,11 +53,11 @@ async def test_get_session_commit_on_success(database):
     mock_session = AsyncMock(spec=AsyncSession)
     mock_session.commit = AsyncMock()
     mock_session.close = AsyncMock()
-    
+
     with patch.object(database.async_session_maker, "__call__", return_value=mock_session):
         async with database.get_session() as session:
             pass
-    
+
     mock_session.commit.assert_called_once()
     mock_session.close.assert_called_once()
 
@@ -69,14 +68,14 @@ async def test_get_session_rollback_on_exception(database):
     mock_session = AsyncMock(spec=AsyncSession)
     mock_session.rollback = AsyncMock()
     mock_session.close = AsyncMock()
-    
+
     with patch.object(database.async_session_maker, "__call__", return_value=mock_session):
         try:
             async with database.get_session() as session:
                 raise ValueError("Test error")
         except ValueError:
             pass
-    
+
     mock_session.rollback.assert_called_once()
     mock_session.close.assert_called_once()
 
@@ -86,9 +85,9 @@ async def test_close(database):
     """Test closing database connections."""
     mock_engine = AsyncMock()
     database.engine = mock_engine
-    
+
     await database.close()
-    
+
     mock_engine.dispose.assert_called_once()
 
 
@@ -99,11 +98,11 @@ async def test_health_check_success(database):
     mock_result = MagicMock()
     mock_result.scalar.return_value = 1
     mock_session.execute = AsyncMock(return_value=mock_result)
-    
+
     with patch.object(database, "get_session") as mock_get_session:
         mock_get_session.return_value.__aenter__.return_value = mock_session
         result = await database.health_check()
-    
+
     assert result is True
 
 
@@ -113,7 +112,7 @@ async def test_health_check_failure(database):
     with patch.object(database, "get_session") as mock_get_session:
         mock_get_session.return_value.__aenter__.side_effect = Exception("Connection failed")
         result = await database.health_check()
-    
+
     assert result is False
 
 
@@ -130,7 +129,7 @@ async def test_get_db_generator():
     """Test get_db dependency generator."""
     if db is None:
         pytest.skip("Database not initialized")
-    
+
     async for session in get_db():
         assert isinstance(session, AsyncSession)
         break  # Just test first iteration
@@ -141,9 +140,8 @@ async def test_get_db_with_tenant():
     """Test get_db dependency generator with tenant ID."""
     if db is None:
         pytest.skip("Database not initialized")
-    
+
     tenant_id = uuid4()
     async for session in get_db(tenant_id=tenant_id):
         assert isinstance(session, AsyncSession)
         break  # Just test first iteration
-

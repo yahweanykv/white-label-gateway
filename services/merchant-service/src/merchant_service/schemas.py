@@ -25,7 +25,9 @@ class MerchantBase(BaseModel):
 class MerchantCreate(MerchantBase):
     """Merchant creation schema."""
 
-    logo_url: Optional[str] = Field(None, description="Merchant logo URL (can be HTTP URL or base64 data URL)")
+    logo_url: Optional[str] = Field(
+        None, description="Merchant logo URL (can be HTTP URL or base64 data URL)"
+    )
 
 
 class MerchantUpdate(BaseModel):
@@ -33,7 +35,9 @@ class MerchantUpdate(BaseModel):
 
     name: Optional[str] = Field(None, min_length=1, max_length=255)
     domain: Optional[str] = Field(None, max_length=255)
-    logo_url: Optional[str] = Field(None, description="Merchant logo URL (can be HTTP URL or base64 data URL)")
+    logo_url: Optional[str] = Field(
+        None, description="Merchant logo URL (can be HTTP URL or base64 data URL)"
+    )
     primary_color: Optional[str] = Field(None, pattern="^#[0-9A-Fa-f]{6}$")
     background_color: Optional[str] = Field(None, pattern="^#[0-9A-Fa-f]{6}$")
     webhook_url: Optional[HttpUrl] = None
@@ -47,7 +51,9 @@ class MerchantResponse(MerchantBase):
     is_active: bool
     created_at: datetime
     updated_at: datetime
-    logo_url: Optional[str] = Field(None, description="Merchant logo URL (can be HTTP URL or base64 data URL)")
+    logo_url: Optional[str] = Field(
+        None, description="Merchant logo URL (can be HTTP URL or base64 data URL)"
+    )
 
     class Config:
         """Pydantic config."""
@@ -75,4 +81,3 @@ class MerchantByApiKeyResponse(BaseModel):
         """Pydantic config."""
 
         from_attributes = True
-

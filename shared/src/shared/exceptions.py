@@ -162,4 +162,3 @@ class RateLimitError(BaseAPIException):
             detail=detail,
             headers=headers,
         )
-

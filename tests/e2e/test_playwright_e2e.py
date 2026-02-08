@@ -153,9 +153,12 @@ async def test_payment_3ds_e2e(gateway_url, merchant_service_url, payment_servic
             assert "3DS Test Merchant" in page_content or "merchant" in page_content.lower()
 
             # Click confirm button
-            confirm_button = page.locator("button:has-text('Подтвердить')").or_(
-                page.locator("button:has-text('Confirm')")
-            ).or_(page.locator("button[type='submit']")).first()
+            confirm_button = (
+                page.locator("button:has-text('Подтвердить')")
+                .or_(page.locator("button:has-text('Confirm')"))
+                .or_(page.locator("button[type='submit']"))
+                .first()
+            )
 
             if await confirm_button.count() > 0:
                 await confirm_button.click()
@@ -207,4 +210,3 @@ async def test_merchant_dashboard_e2e(merchant_service_url):
             assert "Dashboard" in page_content or "dashboard" in page_content.lower()
 
             await browser.close()
-

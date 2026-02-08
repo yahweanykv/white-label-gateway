@@ -110,4 +110,3 @@ class PaginatedResponse(BaseModel):
             page_size=page_size,
             total_pages=total_pages,
         )
-

@@ -18,7 +18,9 @@ from shared.utils.logger import setup_logger
 from shared.middleware import PrometheusMiddleware
 from shared.metrics import get_metrics, service_health
 
-logger = setup_logger(__name__, level=settings.log_level, json_logs=os.getenv("JSON_LOGS", "false").lower() == "true")
+logger = setup_logger(
+    __name__, level=settings.log_level, json_logs=os.getenv("JSON_LOGS", "false").lower() == "true"
+)
 
 
 async def init_database():
@@ -131,4 +133,3 @@ def main():
 
 if __name__ == "__main__":
     main()
-

@@ -77,4 +77,3 @@ async def get_merchant(merchant_id: UUID):
                 status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
                 detail=f"Merchant service unavailable: {str(e)}",
             )
-

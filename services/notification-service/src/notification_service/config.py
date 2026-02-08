@@ -23,9 +23,7 @@ class Settings(BaseSettings):
     log_level: str = Field(default="INFO", description="Logging level")
 
     # Redis
-    redis_url: str = Field(
-        default="redis://localhost:6379/0", description="Redis connection URL"
-    )
+    redis_url: str = Field(default="redis://localhost:6379/0", description="Redis connection URL")
 
     # RabbitMQ
     rabbitmq_url: str = Field(
@@ -61,4 +59,3 @@ class Settings(BaseSettings):
 
 
 settings = Settings()
-

@@ -33,9 +33,7 @@ class Settings(BaseSettings):
     notification_service_url: str = Field(
         default="http://localhost:8003", description="Notification service URL"
     )
-    fraud_service_url: str = Field(
-        default="http://localhost:8004", description="Fraud service URL"
-    )
+    fraud_service_url: str = Field(default="http://localhost:8004", description="Fraud service URL")
 
     # Database
     database_url: str = Field(
@@ -44,9 +42,7 @@ class Settings(BaseSettings):
     )
 
     # Redis
-    redis_url: str = Field(
-        default="redis://localhost:6379/0", description="Redis connection URL"
-    )
+    redis_url: str = Field(default="redis://localhost:6379/0", description="Redis connection URL")
 
     # JWT
     jwt_secret_key: str = Field(
@@ -79,11 +75,8 @@ class Settings(BaseSettings):
 
     # Rate Limiting
     rate_limit_enabled: bool = Field(default=True, description="Enable rate limiting")
-    rate_limit_requests: int = Field(
-        default=1000, description="Rate limit requests per second"
-    )
+    rate_limit_requests: int = Field(default=1000, description="Rate limit requests per second")
     rate_limit_window: int = Field(default=1, description="Rate limit window in seconds")
 
 
 settings = Settings()
-

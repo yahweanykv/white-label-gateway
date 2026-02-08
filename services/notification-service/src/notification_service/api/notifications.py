@@ -51,4 +51,3 @@ async def send_notification(notification_request: NotificationRequest):
         status="sent",
         message="Notification queued for delivery",
     )
-

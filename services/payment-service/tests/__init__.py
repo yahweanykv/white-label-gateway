@@ -1,2 +1,1 @@
 """Payment service tests."""
-

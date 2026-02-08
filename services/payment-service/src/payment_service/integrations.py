@@ -102,6 +102,3 @@ async def publish_payment_event(
             await channel.default_exchange.publish(message, routing_key=queue.name)
     except Exception as exc:  # pragma: no cover - broker failures
         logger.warning("Failed to publish payment event: %s", exc)
-
-
-

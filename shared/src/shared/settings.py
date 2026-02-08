@@ -145,7 +145,9 @@ class FraudServiceSettings(BaseServiceSettings):
     host: str = Field(default="0.0.0.0", description="Server host")
     port: int = Field(default=8004, ge=1, le=65535, description="Server port")
     redis_url: str = Field(..., description="Redis connection URL")
-    fraud_threshold: float = Field(default=0.7, ge=0.0, le=1.0, description="Fraud detection threshold")
+    fraud_threshold: float = Field(
+        default=0.7, ge=0.0, le=1.0, description="Fraud detection threshold"
+    )
     fraud_check_enabled: bool = Field(default=True, description="Enable fraud checking")
 
 
@@ -177,4 +179,3 @@ def get_notification_service_settings() -> NotificationServiceSettings:  # pragm
 def get_fraud_service_settings() -> FraudServiceSettings:  # pragma: no cover
     """Get cached fraud service settings."""
     return FraudServiceSettings()  # pragma: no cover
-

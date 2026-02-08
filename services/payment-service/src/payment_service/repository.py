@@ -59,7 +59,9 @@ async def list_payments_for_merchant(
 ) -> list[PaymentORM]:
     """Return payments filtered by merchant (helper for future expansions)."""
     result = await session.execute(
-        select(PaymentORM).where(PaymentORM.merchant_id == merchant_id).order_by(PaymentORM.created_at.desc())
+        select(PaymentORM)
+        .where(PaymentORM.merchant_id == merchant_id)
+        .order_by(PaymentORM.created_at.desc())
     )
     return list(result.scalars())
 
@@ -71,27 +73,27 @@ async def list_all_payments(
 ) -> list[PaymentORM]:
     """Return all payments, optionally filtered by date range."""
     from datetime import datetime
-    
+
     query = select(PaymentORM)
-    
+
     if date_from:
         try:
-            date_from_obj = datetime.fromisoformat(date_from.replace('Z', '+00:00'))
+            date_from_obj = datetime.fromisoformat(date_from.replace("Z", "+00:00"))
             query = query.where(PaymentORM.created_at >= date_from_obj)
         except (ValueError, AttributeError):
             pass
-    
+
     if date_to:
         try:
-            date_to_obj = datetime.fromisoformat(date_to.replace('Z', '+00:00'))
+            date_to_obj = datetime.fromisoformat(date_to.replace("Z", "+00:00"))
             # Add one day to include the entire end date
             from datetime import timedelta
+
             date_to_obj = date_to_obj + timedelta(days=1)
             query = query.where(PaymentORM.created_at < date_to_obj)
         except (ValueError, AttributeError):
             pass
-    
+
     query = query.order_by(PaymentORM.created_at.desc())
     result = await session.execute(query)
     return list(result.scalars())
-
