@@ -1,0 +1,16 @@
+flowchart LR
+    %% Level 0 DFD - Context Diagram
+    Client[Клиент]
+    Merchant[Мерчант]
+    
+    PaymentSystem[Система обработки платежей<br/>White-Label Payment Gateway]
+    
+    Client <-->|1. Создание платежа<br/>2. Получение статуса| PaymentSystem
+    PaymentSystem <-->|1. Webhook уведомления<br/>2. Email уведомления| Merchant
+    
+    classDef external fill:#E8F4F8,stroke:#2E86AB,stroke-width:2px
+    classDef system fill:#A8DADC,stroke:#457B9D,stroke-width:3px
+    
+    class Client,Merchant external
+    class PaymentSystem system
+

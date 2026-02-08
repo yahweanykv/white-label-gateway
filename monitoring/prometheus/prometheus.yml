@@ -1,0 +1,63 @@
+global:
+  scrape_interval: 15s
+  evaluation_interval: 15s
+  external_labels:
+    cluster: 'payment-gateway'
+    environment: 'production'
+
+# Alertmanager configuration
+# alerting:
+#   alertmanagers:
+#     - static_configs:
+#         - targets: ['alertmanager:9093']
+
+# Load rules once and periodically evaluate them
+# rule_files:
+#   - "alerts.yml"
+
+scrape_configs:
+  # Prometheus itself
+  - job_name: 'prometheus'
+    static_configs:
+      - targets: ['localhost:9090']
+
+  # Gateway service
+  - job_name: 'gateway'
+    metrics_path: '/metrics'
+    static_configs:
+      - targets: ['gateway:8000']
+        labels:
+          service: 'gateway'
+
+  # Merchant service
+  - job_name: 'merchant-service'
+    metrics_path: '/metrics'
+    static_configs:
+      - targets: ['merchant-service:8001']
+        labels:
+          service: 'merchant-service'
+
+  # Payment service
+  - job_name: 'payment-service'
+    metrics_path: '/metrics'
+    static_configs:
+      - targets: ['payment-service:8002']
+        labels:
+          service: 'payment-service'
+
+  # Notification service
+  - job_name: 'notification-service'
+    metrics_path: '/metrics'
+    static_configs:
+      - targets: ['notification-service:8003']
+        labels:
+          service: 'notification-service'
+
+  # Fraud service
+  - job_name: 'fraud-service'
+    metrics_path: '/metrics'
+    static_configs:
+      - targets: ['fraud-service:8004']
+        labels:
+          service: 'fraud-service'
+

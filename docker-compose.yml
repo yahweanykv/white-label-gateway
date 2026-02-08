@@ -1,0 +1,305 @@
+services:
+  # Gateway Service
+  gateway:
+    build:
+      context: .
+      dockerfile: ./services/gateway/Dockerfile
+    container_name: gateway
+    ports:
+      - "8000:8000"
+    environment:
+      - ENV=development
+      - ENVIRONMENT=${ENVIRONMENT:-local}
+      - LOG_LEVEL=INFO
+      - GATEWAY_HOST=0.0.0.0
+      - GATEWAY_PORT=8000
+      - GATEWAY_MERCHANT_SERVICE_URL=http://merchant-service:8001
+      - GATEWAY_PAYMENT_SERVICE_URL=http://payment-service:8002
+      - GATEWAY_NOTIFICATION_SERVICE_URL=http://notification-service:8003
+      - GATEWAY_FRAUD_SERVICE_URL=http://fraud-service:8004
+      - PAYMENT_PROVIDER=${PAYMENT_PROVIDER:-mock_success}
+      - GATEWAY_DATABASE_URL=postgresql+asyncpg://merchant_user:merchant_pass@merchant-db:5432/merchant_db
+      - GATEWAY_REDIS_URL=redis://redis:6379/0
+      - CORS_ORIGINS=http://localhost:3000,http://localhost:3001,http://localhost:8080,http://localhost:5173,http://127.0.0.1:5173,http://127.0.0.1:3000,http://127.0.0.1:3001,http://127.0.0.1:8080
+      - RATE_LIMIT_ENABLED=true
+      - RATE_LIMIT_REQUESTS=1000
+      - RATE_LIMIT_WINDOW=1
+    depends_on:
+      merchant-service:
+        condition: service_healthy
+      payment-service:
+        condition: service_healthy
+      notification-service:
+        condition: service_healthy
+      fraud-service:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    networks:
+      - payment-network
+    volumes:
+      - ./logs/gateway:/app/logs
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8000/health')"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+  # Merchant Service
+  merchant-service:
+    build:
+      context: .
+      dockerfile: ./services/merchant-service/Dockerfile
+    container_name: merchant-service
+    ports:
+      - "8001:8001"
+    environment:
+      - ENV=development
+      - ENVIRONMENT=${ENVIRONMENT:-local}
+      - LOG_LEVEL=INFO
+      - DATABASE_URL=postgresql+asyncpg://merchant_user:merchant_pass@merchant-db:5432/merchant_db
+      - PAYMENT_SERVICE_URL=http://payment-service:8002
+      - CREATE_DEMO_MERCHANT=true
+    depends_on:
+      merchant-db:
+        condition: service_healthy
+    networks:
+      - payment-network
+    volumes:
+      - ./logs/merchant-service:/app/logs
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8001/health')"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+  # Payment Service
+  payment-service:
+    build:
+      context: .
+      dockerfile: ./services/payment-service/Dockerfile
+    container_name: payment-service
+    ports:
+      - "8002:8002"
+    environment:
+      - ENV=development
+      - ENVIRONMENT=${ENVIRONMENT:-local}
+      - LOG_LEVEL=INFO
+      - DATABASE_URL=postgresql+asyncpg://payment_user:payment_pass@payment-db:5432/payment_db
+      - MERCHANT_SERVICE_URL=http://merchant-service:8001
+      - FRAUD_SERVICE_URL=http://fraud-service:8004
+      - NOTIFICATION_SERVICE_URL=http://notification-service:8003
+      - PAYMENT_PROVIDER=${PAYMENT_PROVIDER:-mock_success}
+      - RABBITMQ_URL=amqp://guest:guest@rabbitmq:5672/
+    depends_on:
+      payment-db:
+        condition: service_healthy
+      fraud-service:
+        condition: service_healthy
+      notification-service:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+    networks:
+      - payment-network
+    volumes:
+      - ./logs/payment-service:/app/logs
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8002/health')"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+  # Notification Service
+  notification-service:
+    build:
+      context: .
+      dockerfile: ./services/notification-service/Dockerfile
+    container_name: notification-service
+    ports:
+      - "8003:8003"
+    environment:
+      - ENV=development
+      - ENVIRONMENT=${ENVIRONMENT:-local}
+      - LOG_LEVEL=INFO
+      - REDIS_URL=redis://redis:6379/0
+      - RABBITMQ_URL=amqp://guest:guest@rabbitmq:5672/
+      - MERCHANT_SERVICE_URL=http://merchant-service:8001
+      - SMTP_HOST=smtp.example.com
+      - SMTP_PORT=587
+      - SMTP_USER=
+      - SMTP_PASSWORD=
+      - SMTP_FROM_EMAIL=noreply@example.com
+      - SMTP_USE_TLS=true
+      - WEBHOOK_SECRET=webhook-secret-change-in-production
+      - MAX_RETRIES=3
+      - RETRY_BASE_DELAY=1.0
+    depends_on:
+      redis:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+      merchant-service:
+        condition: service_healthy
+    networks:
+      - payment-network
+    volumes:
+      - ./logs/notification-service:/app/logs
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8003/health')"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+  # Fraud Service
+  fraud-service:
+    build:
+      context: .
+      dockerfile: ./services/fraud-service/Dockerfile
+    container_name: fraud-service
+    ports:
+      - "8004:8004"
+    environment:
+      - ENV=development
+      - ENVIRONMENT=${ENVIRONMENT:-local}
+      - LOG_LEVEL=INFO
+      - REDIS_URL=redis://redis:6379/1
+      - FRAUD_THRESHOLD=0.7
+      - FRAUD_CHECK_ENABLED=true
+    depends_on:
+      redis:
+        condition: service_healthy
+    networks:
+      - payment-network
+    volumes:
+      - ./logs/fraud-service:/app/logs
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8004/health')"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+  # Databases
+  merchant-db:
+    image: postgres:16
+    container_name: merchant-db
+    environment:
+      - POSTGRES_USER=merchant_user
+      - POSTGRES_PASSWORD=merchant_pass
+      - POSTGRES_DB=merchant_db
+    volumes:
+      - merchant-db-data:/var/lib/postgresql/data
+    networks:
+      - payment-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U merchant_user -d merchant_db"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+
+  payment-db:
+    image: postgres:16
+    container_name: payment-db
+    environment:
+      - POSTGRES_USER=payment_user
+      - POSTGRES_PASSWORD=payment_pass
+      - POSTGRES_DB=payment_db
+    volumes:
+      - payment-db-data:/var/lib/postgresql/data
+    networks:
+      - payment-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U payment_user -d payment_db"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+
+  # Redis
+  redis:
+    image: redis:7
+    container_name: redis
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis-data:/data
+    networks:
+      - payment-network
+    restart: unless-stopped
+    command: redis-server --appendonly yes
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+
+  # RabbitMQ
+  rabbitmq:
+    image: rabbitmq:3-management
+    container_name: rabbitmq
+    ports:
+      - "5672:5672"   # AMQP port
+      - "15672:15672" # Management UI
+    environment:
+      - RABBITMQ_DEFAULT_USER=guest
+      - RABBITMQ_DEFAULT_PASS=guest
+    volumes:
+      - rabbitmq-data:/var/lib/rabbitmq
+    networks:
+      - payment-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "rabbitmq-diagnostics", "ping"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 60s
+
+  # pgAdmin (optional)
+  pgadmin:
+    image: dpage/pgadmin4:latest
+    container_name: pgadmin
+    ports:
+      - "5050:80"
+    environment:
+      - PGADMIN_DEFAULT_EMAIL=admin@example.com
+      - PGADMIN_DEFAULT_PASSWORD=admin
+      - PGADMIN_CONFIG_SERVER_MODE=False
+    volumes:
+      - pgadmin-data:/var/lib/pgadmin
+    networks:
+      - payment-network
+    restart: unless-stopped
+    profiles:
+      - tools
+    healthcheck:
+      test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost/misc/ping"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 30s
+
+volumes:
+  merchant-db-data:
+  payment-db-data:
+  redis-data:
+  rabbitmq-data:
+  pgadmin-data:
+
+networks:
+  payment-network:
+    driver: bridge

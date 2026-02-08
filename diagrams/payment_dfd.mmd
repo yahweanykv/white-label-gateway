@@ -1,0 +1,55 @@
+flowchart TB
+    %% External Entities
+    Client[Клиент<br/>External Entity]
+    Merchant[Мерчант<br/>External Entity]
+    SMTP[SMTP Server<br/>External Entity]
+    
+    %% Processes
+    Gateway[1.0 Gateway Service<br/>Валидация и маршрутизация]
+    Payment[2.0 Payment Service<br/>Обработка платежа]
+    Fraud[3.0 Fraud Service<br/>Проверка мошенничества]
+    RabbitMQ_Process[4.0 RabbitMQ<br/>Очередь событий]
+    Notification[5.0 Notification Service<br/>Отправка уведомлений]
+    
+    %% Data Stores
+    Redis[(Redis<br/>Rate Limit Cache)]
+    MerchantDB[(Merchant DB<br/>Данные мерчантов)]
+    PaymentDB[(Payment DB<br/>Транзакции)]
+    FraudCache[(Redis<br/>Fraud Cache)]
+    
+    %% Synchronous Flow - Main Path
+    Client -->|1. POST /api/v1/payments<br/>X-API-Key| Gateway
+    Gateway -->|2. Проверка API-ключа| MerchantDB
+    MerchantDB -->|3. Данные мерчанта| Gateway
+    Gateway -->|4. Проверка rate limit| Redis
+    Redis -->|5. Результат проверки| Gateway
+    Gateway -->|6. Создание платежа| Payment
+    Payment -->|7. Сохранение pending| PaymentDB
+    Payment -->|8. Проверка мошенничества| Fraud
+    Fraud -->|9. Проверка кэша| FraudCache
+    FraudCache -->|10. Результат кэша| Fraud
+    Fraud -->|11. Fraud score| Payment
+    Payment -->|12. Обработка платежа| PaymentDB
+    PaymentDB -->|13. Обновление статуса| Payment
+    Payment -->|14. Ответ с payment_id| Gateway
+    Gateway -->|15. 201 Created<br/>Payment Response| Client
+    
+    %% Asynchronous Flow - Event Processing
+    Payment -->|16. Публикация события<br/>payment.succeeded| RabbitMQ_Process
+    RabbitMQ_Process -->|17. Событие из очереди| Notification
+    Notification -->|18. Получение webhook_url| MerchantDB
+    MerchantDB -->|19. Webhook URL| Notification
+    Notification -->|20. Webhook запрос| Merchant
+    Notification -->|21. Email уведомление| SMTP
+    
+    %% Styling
+    classDef external fill:#E8F4F8,stroke:#2E86AB,stroke-width:2px
+    classDef process fill:#A8DADC,stroke:#457B9D,stroke-width:2px
+    classDef datastore fill:#F1FAEE,stroke:#1D3557,stroke-width:2px
+    classDef syncPath fill:#90EE90,stroke:#006400,stroke-width:3px
+    classDef asyncPath fill:#FFB347,stroke:#FF8C00,stroke-width:3px
+    
+    class Client,Merchant,SMTP external
+    class Gateway,Payment,Fraud,RabbitMQ_Process,Notification process
+    class Redis,MerchantDB,PaymentDB,FraudCache datastore
+

@@ -1,0 +1,103 @@
+services:
+  # Gateway Service (Main API Gateway)
+  # Примечание: На бесплатном плане Render можно создать только один web-сервис
+  # Для полного деплоя всех сервисов нужен платный план или используйте ручной деплой
+  - type: web
+    name: gateway
+    env: docker
+    dockerfilePath: ./Dockerfile
+    plan: free
+    healthCheckPath: /health
+    envVars:
+      - key: ENVIRONMENT
+        value: production
+      - key: PAYMENT_PROVIDER
+        value: mock_success
+      - key: LOG_LEVEL
+        value: INFO
+      # Обновите эти URL после создания других сервисов на Render
+      # Используйте Internal Database URL и Internal Redis URL из Render Dashboard
+      - key: MERCHANT_SERVICE_URL
+        value: https://merchant-service-xxxx.onrender.com
+      - key: PAYMENT_SERVICE_URL
+        value: https://payment-service-xxxx.onrender.com
+      - key: NOTIFICATION_SERVICE_URL
+        value: https://notification-service-xxxx.onrender.com
+      - key: FRAUD_SERVICE_URL
+        value: https://fraud-service-xxxx.onrender.com
+      - key: REDIS_URL
+        value: redis://redis-xxxx.onrender.com:6379
+      - key: JWT_SECRET_KEY
+        generateValue: true
+      - key: CORS_ORIGINS
+        value: "*"
+
+  # Merchant Service
+  - type: web
+    name: merchant-service
+    env: docker
+    dockerfilePath: ./services/merchant-service/Dockerfile
+    plan: free
+    healthCheckPath: /health
+    envVars:
+      - key: ENVIRONMENT
+        value: production
+      # Обновите после создания PostgreSQL на Render
+      - key: MERCHANT_DATABASE_URL
+        value: postgresql+asyncpg://user:pass@host:5432/merchant_db
+      - key: PAYMENT_SERVICE_URL
+        value: https://payment-service-xxxx.onrender.com
+
+  # Payment Service
+  - type: web
+    name: payment-service
+    env: docker
+    dockerfilePath: ./services/payment-service/Dockerfile
+    plan: free
+    healthCheckPath: /health
+    envVars:
+      - key: ENVIRONMENT
+        value: production
+      - key: PAYMENT_PROVIDER
+        value: mock_success
+      # Обновите после создания PostgreSQL на Render
+      - key: PAYMENT_DATABASE_URL
+        value: postgresql+asyncpg://user:pass@host:5432/payment_db
+
+  # Notification Service
+  - type: web
+    name: notification-service
+    env: docker
+    dockerfilePath: ./services/notification-service/Dockerfile
+    plan: free
+    healthCheckPath: /health
+    envVars:
+      - key: ENVIRONMENT
+        value: production
+      # Обновите после создания Redis на Render
+      - key: REDIS_URL
+        value: redis://redis-xxxx.onrender.com:6379
+
+  # Fraud Service
+  - type: web
+    name: fraud-service
+    env: docker
+    dockerfilePath: ./services/fraud-service/Dockerfile
+    plan: free
+    healthCheckPath: /health
+    envVars:
+      - key: ENVIRONMENT
+        value: production
+
+  # PostgreSQL Database
+  - type: pgsql
+    name: postgres
+    plan: free
+    databaseName: merchant_db
+    user: merchant_user
+
+  # Redis Cache
+  - type: redis
+    name: redis
+    plan: free
+

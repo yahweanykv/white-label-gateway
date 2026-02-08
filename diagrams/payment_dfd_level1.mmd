@@ -1,0 +1,52 @@
+flowchart TB
+    %% Level 1 DFD - Main Processes
+    Client[Клиент]
+    Merchant[Мерчант]
+    
+    subgraph "Payment Gateway System"
+        P1[1.0<br/>Gateway Service<br/>Валидация и маршрутизация]
+        P2[2.0<br/>Payment Service<br/>Обработка платежа]
+        P3[3.0<br/>Fraud Service<br/>Проверка мошенничества]
+        P4[4.0<br/>Notification Service<br/>Отправка уведомлений]
+    end
+    
+    D1[(D1: Merchant DB)]
+    D2[(D2: Payment DB)]
+    D3[(D3: Redis)]
+    D4[(D4: RabbitMQ)]
+    
+    %% Synchronous flows
+    Client -->|Запрос платежа| P1
+    P1 -->|Проверка API-ключа| D1
+    D1 -->|Данные мерчанта| P1
+    P1 -->|Rate limit check| D3
+    D3 -->|Результат| P1
+    P1 -->|Создание платежа| P2
+    P2 -->|Сохранение транзакции| D2
+    P2 -->|Проверка мошенничества| P3
+    P3 -->|Fraud cache| D3
+    D3 -->|Кэш результат| P3
+    P3 -->|Fraud score| P2
+    P2 -->|Обновление статуса| D2
+    P2 -->|Ответ| P1
+    P1 -->|Payment Response| Client
+    
+    %% Asynchronous flows
+    P2 -.->|Событие payment.succeeded| D4
+    D4 -.->|Событие из очереди| P4
+    P4 -.->|Получение webhook_url| D1
+    D1 -.->|Webhook URL| P4
+    P4 -.->|Webhook запрос| Merchant
+    P4 -.->|Email уведомление| Merchant
+    
+    %% Styling
+    classDef process fill:#BBDEFB,stroke:#2196F3,stroke-width:2px
+    classDef datastore fill:#F3E5F5,stroke:#9C27B0,stroke-width:2px
+    classDef external fill:#FFE0B2,stroke:#F57C00,stroke-width:2px
+    classDef syncArrow stroke:#4CAF50,stroke-width:3px
+    classDef asyncArrow stroke:#FF9800,stroke-width:3px,stroke-dasharray: 5 5
+    
+    class P1,P2,P3,P4 process
+    class D1,D2,D3,D4 datastore
+    class Client,Merchant external
+

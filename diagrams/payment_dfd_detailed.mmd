@@ -1,0 +1,51 @@
+flowchart TB
+    subgraph "СИНХРОННЫЙ ПУТЬ (Synchronous Path)"
+        direction TB
+        Client[Клиент]
+        Gateway[Gateway Service<br/>1. Валидация API-ключа<br/>2. Rate Limiting<br/>3. Маршрутизация]
+        Payment[Payment Service<br/>1. Создание платежа<br/>2. Fraud Check<br/>3. Обработка<br/>4. Обновление статуса]
+        Fraud[Fraud Service<br/>1. Расчет risk score<br/>2. Кэширование]
+        
+        Client -->|POST /api/v1/payments<br/>X-API-Key: sk_live_...| Gateway
+        Gateway -->|GET /merchants/by-api-key| MerchantDB1[(Merchant DB)]
+        MerchantDB1 -->|Merchant Data| Gateway
+        Gateway -->|Check rate limit| Redis1[(Redis)]
+        Redis1 -->|Rate limit OK| Gateway
+        Gateway -->|POST /api/v1/payments| Payment
+        Payment -->|INSERT payments<br/>status: pending| PaymentDB1[(Payment DB)]
+        Payment -->|POST /fraud/check| Fraud
+        Fraud -->|Check cache| Redis2[(Redis Cache)]
+        Redis2 -->|Cache miss| Fraud
+        Fraud -->|Calculate risk score<br/>NumPy operations| Fraud
+        Fraud -->|Save to cache| Redis2
+        Fraud -->|risk_score: 0.23| Payment
+        Payment -->|Process payment<br/>mock_success| Payment
+        Payment -->|UPDATE payments<br/>status: succeeded| PaymentDB1
+        Payment -->|Payment Response| Gateway
+        Gateway -->|201 Created<br/>payment_id, status| Client
+    end
+    
+    subgraph "АСИНХРОННЫЙ ПУТЬ (Asynchronous Path)"
+        direction TB
+        RabbitMQ[RabbitMQ Queue<br/>payment.succeeded]
+        Notification[Notification Service<br/>Background Consumer<br/>1. Получение события<br/>2. Отправка webhook<br/>3. Отправка email]
+        
+        PaymentDB1 -.->|Publish event| RabbitMQ
+        RabbitMQ -.->|Consume message| Notification
+        Notification -.->|GET /merchants/{id}| MerchantDB2[(Merchant DB)]
+        MerchantDB2 -.->|webhook_url| Notification
+        Notification -.->|POST webhook_url<br/>Retry: 3 attempts| MerchantWebhook[Мерчант<br/>Webhook Endpoint]
+        Notification -.->|SMTP Email| SMTP[SMTP Server]
+    end
+    
+    %% Styling
+    classDef syncBox fill:#E8F5E9,stroke:#4CAF50,stroke-width:3px
+    classDef asyncBox fill:#FFF3E0,stroke:#FF9800,stroke-width:3px
+    classDef process fill:#BBDEFB,stroke:#2196F3,stroke-width:2px
+    classDef datastore fill:#F3E5F5,stroke:#9C27B0,stroke-width:2px
+    classDef external fill:#FFE0B2,stroke:#F57C00,stroke-width:2px
+    
+    class Gateway,Payment,Fraud process
+    class MerchantDB1,PaymentDB1,Redis1,Redis2,MerchantDB2 datastore
+    class Client,MerchantWebhook,SMTP external
+

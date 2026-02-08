@@ -1,0 +1,53 @@
+sequenceDiagram
+    participant Client as Клиент
+    participant Gateway as Gateway Service
+    participant Merchant as Merchant Service
+    participant Payment as Payment Service
+    participant Fraud as Fraud Service
+    participant RabbitMQ as RabbitMQ
+    participant Notification as Notification Service
+    participant DB as PostgreSQL
+    
+    Client->>Gateway: POST /api/v1/payments<br/>(X-API-Key: sk_live_...)
+    Note over Gateway: Валидация API-ключа
+    Gateway->>Merchant: GET /api/v1/merchants/by-api-key<br/>(X-API-Key)
+    Merchant->>DB: SELECT * FROM merchants<br/>WHERE api_keys @> ARRAY[?]
+    DB-->>Merchant: Merchant Data
+    Merchant-->>Gateway: Merchant Info<br/>{merchant_id, name, status}
+    
+    alt API Key Invalid
+        Gateway-->>Client: 401 Unauthorized
+    end
+    
+    Note over Gateway: Rate Limiting (Redis)
+    Gateway->>Gateway: Check rate limit<br/>(1000 req/sec)
+    
+    Gateway->>Payment: POST /api/v1/payments<br/>{merchant_id, amount, currency}
+    Payment->>DB: INSERT INTO payments<br/>(status: 'pending')
+    DB-->>Payment: payment_id
+    
+    Payment->>Fraud: POST /api/v1/fraud/check<br/>{amount, currency, merchant_id}
+    Fraud->>Fraud: Calculate fraud score<br/>(ML algorithm)
+    Fraud-->>Payment: {is_fraud: false, score: 0.23}
+    
+    alt Fraud Detected
+        Payment->>DB: UPDATE payments<br/>(status: 'failed')
+        Payment-->>Gateway: 400 Bad Request
+        Gateway-->>Client: Payment Failed
+    end
+    
+    Note over Payment: Process Payment<br/>(Mock Provider)
+    Payment->>Payment: Process payment<br/>(mock_success/mock_3ds)
+    Payment->>DB: UPDATE payments<br/>(status: 'succeeded')
+    
+    Payment->>RabbitMQ: Publish event<br/>payment.succeeded
+    Payment-->>Gateway: Payment Response<br/>{payment_id, status, amount}
+    Gateway-->>Client: 201 Created<br/>{payment_id, status: 'succeeded'}
+    
+    RabbitMQ->>Notification: Consume event<br/>payment.succeeded
+    Notification->>Merchant: GET merchant webhook_url
+    Notification->>Notification: Send Webhook<br/>(POST webhook_url)
+    Notification->>Notification: Send Email<br/>(SMTP)
+    
+    Note over Client,Notification: Асинхронная обработка<br/>уведомлений
+

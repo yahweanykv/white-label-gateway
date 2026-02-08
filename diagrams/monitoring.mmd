@@ -1,0 +1,55 @@
+graph TB
+    subgraph "Микросервисы"
+        Gateway[Gateway Service]
+        Merchant[Merchant Service]
+        Payment[Payment Service]
+        Notification[Notification Service]
+        Fraud[Fraud Service]
+    end
+    
+    subgraph "Метрики"
+        HTTP_Metrics[HTTP метрики<br/>RPS, Latency, Error Rate]
+        Business_Metrics[Бизнес метрики<br/>Payments, Amounts]
+        Infra_Metrics[Инфраструктура<br/>DB, Redis]
+        Health_Metrics[Health метрики<br/>Service Status]
+    end
+    
+    subgraph "Сбор и хранение"
+        Prometheus[Prometheus<br/>:9090<br/>Time Series DB]
+    end
+    
+    subgraph "Визуализация"
+        Grafana[Grafana<br/>:3000<br/>Dashboards]
+    end
+    
+    subgraph "Логирование"
+        JSON_Logs[JSON Logs<br/>Структурированные]
+        ELK[ELK Stack<br/>Опционально]
+    end
+    
+    Gateway -->|/metrics| HTTP_Metrics
+    Merchant -->|/metrics| HTTP_Metrics
+    Payment -->|/metrics| Business_Metrics
+    Notification -->|/metrics| HTTP_Metrics
+    Fraud -->|/metrics| HTTP_Metrics
+    
+    HTTP_Metrics --> Prometheus
+    Business_Metrics --> Prometheus
+    Infra_Metrics --> Prometheus
+    Health_Metrics --> Prometheus
+    
+    Prometheus -->|Query| Grafana
+    
+    Gateway --> JSON_Logs
+    Merchant --> JSON_Logs
+    Payment --> JSON_Logs
+    Notification --> JSON_Logs
+    Fraud --> JSON_Logs
+    
+    JSON_Logs --> ELK
+    
+    style Prometheus fill:#E6522C,color:#fff
+    style Grafana fill:#F46800,color:#fff
+    style Gateway fill:#4F46E5,color:#fff
+    style Payment fill:#10B981,color:#fff
+

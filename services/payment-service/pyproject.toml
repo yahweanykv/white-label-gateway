@@ -1,0 +1,41 @@
+[tool.poetry]
+name = "payment-service"
+version = "0.1.0"
+description = "Payment processing service for white-label payment gateway"
+authors = ["Your Name <your.email@example.com>"]
+readme = "README.md"
+packages = [{include = "payment_service", from = "src"}]
+
+[tool.poetry.dependencies]
+python = "^3.11"
+fastapi = "^0.109.0"
+uvicorn = {extras = ["standard"], version = "^0.27.0"}
+sqlalchemy = "^2.0.25"
+alembic = "^1.13.1"
+asyncpg = "^0.29.0"
+pydantic = "^2.5.0"
+pydantic-settings = "^2.1.0"
+httpx = "^0.27.0"
+aio-pika = "^9.3.0"
+shared = {path = "../../shared", develop = true}
+
+[tool.poetry.group.dev.dependencies]
+pytest = "^8.0.0"
+pytest-asyncio = "^0.23.0"
+pytest-cov = "^4.1.0"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
+
+[tool.poetry.scripts]
+payment-service = "payment_service.main:main"
+
+[tool.black]
+line-length = 100
+target-version = ['py311']
+
+[tool.ruff]
+line-length = 100
+target-version = "py311"
+

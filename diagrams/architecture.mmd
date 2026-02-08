@@ -1,0 +1,36 @@
+graph TB
+    Client[Клиентские приложения<br/>Web/Mobile/API]
+    
+    Client --> Gateway[Gateway Service<br/>:8000<br/>API Gateway]
+    
+    Gateway --> Merchant[Merchant Service<br/>:8001<br/>Управление мерчантами]
+    Gateway --> Payment[Payment Service<br/>:8002<br/>Обработка платежей]
+    Gateway --> Notification[Notification Service<br/>:8003<br/>Уведомления]
+    Gateway --> Fraud[Fraud Service<br/>:8004<br/>Обнаружение мошенничества]
+    
+    Payment --> Fraud
+    Payment --> Notification
+    Payment --> RabbitMQ[RabbitMQ<br/>:5672<br/>Очереди сообщений]
+    Notification --> RabbitMQ
+    Notification --> Merchant
+    
+    Merchant --> MerchantDB[(Merchant DB<br/>PostgreSQL 16<br/>merchant_db)]
+    Payment --> PaymentDB[(Payment DB<br/>PostgreSQL 16<br/>payment_db)]
+    
+    Gateway --> Redis[(Redis 7<br/>:6379<br/>Кэш и Rate Limiting)]
+    Fraud --> Redis
+    Notification --> Redis
+    
+    Gateway --> Prometheus[Prometheus<br/>:9090<br/>Сбор метрик]
+    Prometheus --> Grafana[Grafana<br/>:3000<br/>Визуализация]
+    
+    style Gateway fill:#4F46E5,color:#fff,stroke:#333,stroke-width:3px
+    style Payment fill:#10B981,color:#fff,stroke:#333,stroke-width:2px
+    style Merchant fill:#F59E0B,color:#fff,stroke:#333,stroke-width:2px
+    style Notification fill:#3B82F6,color:#fff,stroke:#333,stroke-width:2px
+    style Fraud fill:#EF4444,color:#fff,stroke:#333,stroke-width:2px
+    style RabbitMQ fill:#FF6B6B,color:#fff,stroke:#333,stroke-width:2px
+    style Redis fill:#DC2626,color:#fff,stroke:#333,stroke-width:2px
+    style Prometheus fill:#E6522C,color:#fff,stroke:#333,stroke-width:2px
+    style Grafana fill:#F46800,color:#fff,stroke:#333,stroke-width:2px
+

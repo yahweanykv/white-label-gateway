@@ -1,0 +1,49 @@
+erDiagram
+    MERCHANTS {
+        uuid id PK "PRIMARY KEY"
+        string name "NOT NULL, INDEXED"
+        string domain "UNIQUE, INDEXED"
+        string_array api_keys "NOT NULL"
+        string logo_url "NULLABLE"
+        string primary_color "NULLABLE"
+        string background_color "NULLABLE"
+        string webhook_url "NULLABLE"
+        boolean is_active "NOT NULL, DEFAULT TRUE, INDEXED"
+        timestamp created_at "NOT NULL, DEFAULT NOW()"
+        timestamp updated_at "NOT NULL, DEFAULT NOW()"
+    }
+    
+    PAYMENTS {
+        uuid payment_id PK "PRIMARY KEY"
+        uuid merchant_id FK "NOT NULL, INDEXED"
+        decimal amount "NOT NULL, NUMERIC(12,2)"
+        string currency "NOT NULL, VARCHAR(3)"
+        string status "NOT NULL, INDEXED"
+        string payment_method "NOT NULL"
+        string transaction_id "NULLABLE, INDEXED"
+        jsonb metadata "NULLABLE"
+        decimal fraud_risk_score "NULLABLE, NUMERIC(5,2)"
+        string provider "NOT NULL, DEFAULT 'mock'"
+        timestamp created_at "NOT NULL, INDEXED"
+        timestamp updated_at "NOT NULL"
+    }
+    
+    GATEWAY_PAYMENT_LOGS {
+        uuid request_id PK "PRIMARY KEY"
+        uuid merchant_id FK "NOT NULL, INDEXED"
+        uuid payment_id FK "NULLABLE, INDEXED"
+        string path "NOT NULL"
+        string method "NOT NULL"
+        integer status_code "NULLABLE"
+        jsonb request_payload "NULLABLE"
+        jsonb response_payload "NULLABLE"
+        jsonb metadata "NULLABLE"
+        string error_message "NULLABLE"
+        timestamp created_at "NOT NULL, INDEXED"
+        timestamp updated_at "NOT NULL"
+    }
+    
+    MERCHANTS ||--o{ PAYMENTS : "has many"
+    MERCHANTS ||--o{ GATEWAY_PAYMENT_LOGS : "generates"
+    PAYMENTS ||--o{ GATEWAY_PAYMENT_LOGS : "tracked in"
+
