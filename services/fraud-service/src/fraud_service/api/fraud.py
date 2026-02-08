@@ -1,6 +1,6 @@
 """Fraud detection API routes."""
 
-from fastapi import APIRouter, HTTPException, status
+from fastapi import APIRouter
 from pydantic import BaseModel
 from uuid import UUID
 from decimal import Decimal

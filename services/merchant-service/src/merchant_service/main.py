@@ -5,10 +5,10 @@ import signal
 import uvicorn
 from contextlib import asynccontextmanager
 
-from fastapi import FastAPI
+from fastapi import FastAPI, Request as FastAPIRequest
+from fastapi.exceptions import RequestValidationError
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import Response
-from sqlalchemy.ext.asyncio import AsyncSession
+from fastapi.responses import JSONResponse, Response
 
 from merchant_service.api import router
 from merchant_service.config import settings
@@ -123,7 +123,7 @@ async def create_loadtest_merchant():
             db_session.add(loadtest_merchant)
             await db_session.commit()
             logger.info(f"Load test merchant created with API key: {LOADTEST_API_KEY}")
-    except IntegrityError as e:
+    except IntegrityError:
         # Duplicate domain/key from another worker — merchant already exists
         logger.info("Load test merchant already exists (race), skipping")
     except Exception as e:
@@ -183,12 +183,8 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+
 # Add exception handler for validation errors to see what's wrong
-from fastapi import Request as FastAPIRequest
-from fastapi.exceptions import RequestValidationError
-from fastapi.responses import JSONResponse
-
-
 @app.exception_handler(RequestValidationError)
 async def validation_exception_handler(request: FastAPIRequest, exc: RequestValidationError):
     """Handle validation errors with detailed logging."""

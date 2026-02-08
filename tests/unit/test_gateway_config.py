@@ -1,8 +1,5 @@
 """Unit tests for gateway config."""
 
-import os
-import pytest
-
 from gateway.config import Settings
 
 

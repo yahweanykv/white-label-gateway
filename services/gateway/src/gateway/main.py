@@ -11,7 +11,7 @@ from fastapi.openapi.utils import get_openapi
 from gateway.router import router
 from gateway.config import settings
 from gateway.middlewares import TenantMiddleware, RateLimitMiddleware
-from gateway.deps import get_redis, get_db
+from gateway.deps import get_redis
 from shared.utils.logger import setup_logger
 from shared.middleware import PrometheusMiddleware
 from shared.metrics import get_metrics, service_health

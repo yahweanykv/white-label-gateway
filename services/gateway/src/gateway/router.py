@@ -1,6 +1,6 @@
 """API router with all routes."""
 
-from fastapi import APIRouter, Depends, Request, Response
+from fastapi import APIRouter, Depends
 from typing import Annotated
 
 from gateway.api.mock import router as mock_router

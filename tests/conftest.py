@@ -3,11 +3,9 @@
 import os
 import sys
 from pathlib import Path
-from typing import AsyncGenerator
 from uuid import uuid4
 
 import pytest
-from httpx import AsyncClient
 from testcontainers.postgres import PostgresContainer
 from testcontainers.redis import RedisContainer
 

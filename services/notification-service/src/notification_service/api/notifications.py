@@ -1,6 +1,6 @@
 """Notification API routes."""
 
-from fastapi import APIRouter, HTTPException, status
+from fastapi import APIRouter, status
 from pydantic import BaseModel, EmailStr
 from typing import Optional
 from uuid import UUID

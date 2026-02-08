@@ -4,10 +4,8 @@ from unittest.mock import AsyncMock, MagicMock, patch
 from uuid import uuid4
 
 import pytest
-from sqlalchemy.ext.asyncio import AsyncSession
-
 from gateway.audit import create_payment_log, finalize_payment_log
-from shared.models.db import GatewayPaymentLog
+from sqlalchemy.ext.asyncio import AsyncSession
 
 
 @pytest.mark.asyncio
@@ -71,7 +69,6 @@ async def test_finalize_payment_log_success(mock_db):
 @patch("gateway.audit.db")
 async def test_finalize_payment_log_not_found(mock_db):
     """Test finalizing payment log when entry not found."""
-    from sqlalchemy import select
 
     merchant_id = uuid4()
     request_id = uuid4()

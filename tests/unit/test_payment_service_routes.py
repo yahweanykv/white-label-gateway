@@ -1,17 +1,14 @@
 """Unit tests for payment service routes."""
 
-from datetime import datetime
 from decimal import Decimal
 from uuid import uuid4
 
+import payment_service.api.payments as payments_module
 import pytest
 from fastapi import FastAPI
 from fastapi.testclient import TestClient
-
-import payment_service.api.payments as payments_module
 from payment_service.api.payments import router
 from payment_service.deps import get_db
-from shared.models.payment import PaymentMethod, PaymentRequest, PaymentStatus
 
 
 @pytest.fixture
@@ -278,9 +275,6 @@ class TestPaymentServiceRoutes:
 
     def test_get_all_payments(self, client, monkeypatch):
         """Test getting all payments."""
-        from datetime import datetime
-        from payment_service.repository import list_all_payments
-        from shared.models.payment import PaymentORM
 
         async def mock_list_all_payments(session, date_from=None, date_to=None):
             return []
@@ -317,7 +311,6 @@ class TestPaymentServiceRoutes:
 
     def test_get_payments_by_merchant(self, client, monkeypatch):
         """Test getting payments by merchant."""
-        from payment_service.repository import list_payments_for_merchant
 
         async def mock_list_payments_for_merchant(session, merchant_id):
             return []
@@ -338,8 +331,7 @@ class TestPaymentServiceRoutes:
     def test_get_payment_from_db(self, client, monkeypatch):
         """Test getting payment from database when not in store."""
         from datetime import datetime
-        from payment_service.repository import get_payment
-        from shared.models.payment import PaymentORM
+
         from shared.models.db import Payment as PaymentDB
 
         payment_id = uuid4()
@@ -384,8 +376,10 @@ class TestPaymentServiceRoutes:
     def test_get_payment_wrong_merchant(self, client, monkeypatch):
         """Test getting payment that belongs to different merchant."""
         from datetime import datetime
+
         from payment_service.core.mock_providers import payment_store
-        from shared.models.payment import PaymentResponse, PaymentStatus, PaymentMethod
+
+        from shared.models.payment import PaymentMethod, PaymentResponse, PaymentStatus
 
         payment_id = uuid4()
         merchant_id = uuid4()

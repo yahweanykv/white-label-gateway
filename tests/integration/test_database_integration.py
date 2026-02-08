@@ -1,10 +1,10 @@
 """Integration tests for database operations."""
 
 import pytest
+from merchant_service.models import Merchant
 from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine
 from sqlalchemy.orm import sessionmaker
 
-from merchant_service.models import Merchant
 from shared.database import Base
 
 

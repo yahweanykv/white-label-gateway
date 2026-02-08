@@ -1,20 +1,20 @@
 """Unit tests for payment service repository."""
 
+from datetime import datetime
+from decimal import Decimal
 from unittest.mock import AsyncMock, MagicMock
 from uuid import uuid4
 
 import pytest
-from decimal import Decimal
-from datetime import datetime
-from sqlalchemy.ext.asyncio import AsyncSession
-
 from payment_service.repository import (
     get_payment,
     list_payments_for_merchant,
     save_payment,
 )
-from shared.models.payment import PaymentMethod, PaymentRequest, PaymentResponse, PaymentStatus
+from sqlalchemy.ext.asyncio import AsyncSession
+
 from shared.models.db import Payment as PaymentORM
+from shared.models.payment import PaymentMethod, PaymentRequest, PaymentResponse, PaymentStatus
 
 
 @pytest.mark.asyncio
@@ -129,7 +129,6 @@ async def test_get_payment_not_found():
 @pytest.mark.asyncio
 async def test_list_payments_for_merchant():
     """Test listing payments for merchant."""
-    from sqlalchemy import select
 
     merchant_id = uuid4()
     payment1 = MagicMock(spec=PaymentORM)

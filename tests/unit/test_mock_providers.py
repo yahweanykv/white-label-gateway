@@ -4,7 +4,6 @@ from decimal import Decimal
 from uuid import uuid4
 
 import pytest
-
 from payment_service.core.mock_providers import (
     FailedMockProvider,
     PaymentStore,
@@ -14,6 +13,7 @@ from payment_service.core.mock_providers import (
     ThreeDSMockProvider,
     get_provider,
 )
+
 from shared.models.payment import PaymentMethod, PaymentRequest, PaymentStatus
 
 

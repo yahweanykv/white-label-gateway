@@ -1,7 +1,7 @@
 """Dashboard API routes."""
 
 from decimal import Decimal
-from typing import Annotated, Optional
+from typing import Annotated
 
 import httpx
 from fastapi import APIRouter, Depends, HTTPException, Request, status
@@ -84,7 +84,7 @@ async def get_dashboard(
         try:
             result = await db.execute(
                 select(Merchant).where(
-                    Merchant.api_keys.contains([x_api_key]), Merchant.is_active == True
+                    Merchant.api_keys.contains([x_api_key]), Merchant.is_active.is_(True)
                 )
             )
             current_merchant = result.scalar_one_or_none()
@@ -98,7 +98,7 @@ async def get_dashboard(
             try:
                 result = await db.execute(
                     select(Merchant).where(
-                        Merchant.api_keys.contains([api_key]), Merchant.is_active == True
+                        Merchant.api_keys.contains([api_key]), Merchant.is_active.is_(True)
                     )
                 )
                 current_merchant = result.scalar_one_or_none()

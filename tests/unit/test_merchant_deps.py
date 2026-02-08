@@ -5,10 +5,9 @@ from uuid import uuid4
 
 import pytest
 from fastapi import HTTPException
-from sqlalchemy.ext.asyncio import AsyncSession
-
 from merchant_service.deps import get_current_merchant
 from merchant_service.models import Merchant
+from sqlalchemy.ext.asyncio import AsyncSession
 
 
 @pytest.mark.asyncio
@@ -65,7 +64,7 @@ async def test_get_current_merchant_not_found():
 async def test_get_current_merchant_inactive():
     """Test getting current merchant that is inactive."""
     api_key = "sk_test_123"
-    merchant = Merchant(
+    _ = Merchant(
         id=uuid4(),
         name="Inactive Merchant",
         domain="inactive.example.com",

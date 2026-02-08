@@ -1,15 +1,12 @@
 """Unit tests for merchant service routes."""
 
-from uuid import uuid4
-
 import pytest
 from fastapi import FastAPI
 from fastapi.testclient import TestClient
+from merchant_service.api.merchants import router
 from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine
 from sqlalchemy.orm import sessionmaker
 
-from merchant_service.api.merchants import router
-from merchant_service.models import Merchant
 from shared.database import Base
 
 
@@ -296,8 +293,6 @@ class TestMerchantServiceRoutes:
         }
         create_response = client.post("/api/v1/merchants", json=merchant_data)
         assert create_response.status_code == 201
-        api_key = create_response.json()["api_keys"][0]
-        merchant_id = create_response.json()["id"]
 
         # Deactivate merchant (would need to update is_active in DB)
         # For now, just test that inactive merchants are filtered

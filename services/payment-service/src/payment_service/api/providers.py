@@ -5,7 +5,7 @@ from fastapi import APIRouter, HTTPException, status
 from pydantic import BaseModel
 
 from payment_service.config import settings
-from payment_service.core.mock_providers import MOCK_PROVIDERS, get_provider
+from payment_service.core.mock_providers import MOCK_PROVIDERS
 
 router = APIRouter()
 

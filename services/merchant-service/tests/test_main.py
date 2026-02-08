@@ -1,6 +1,5 @@
 """Tests for merchant service main module."""
 
-import pytest
 from fastapi.testclient import TestClient
 
 from merchant_service.main import app

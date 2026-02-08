@@ -2,11 +2,8 @@
 
 import json
 import logging
-import os
 import sys
-from unittest.mock import MagicMock, patch
-
-import pytest
+from unittest.mock import MagicMock
 
 from shared.utils.logger import JSONFormatter, StructuredLogger, setup_logger
 

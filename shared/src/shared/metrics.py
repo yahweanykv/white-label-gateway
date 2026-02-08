@@ -1,7 +1,6 @@
 """Prometheus metrics utilities."""
 
 from prometheus_client import Counter, Histogram, Gauge, generate_latest, REGISTRY
-from prometheus_client.openmetrics.exposition import CONTENT_TYPE_LATEST
 
 
 # HTTP metrics

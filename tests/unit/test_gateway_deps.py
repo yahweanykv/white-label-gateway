@@ -5,10 +5,10 @@ from uuid import uuid4
 
 import pytest
 from fastapi import HTTPException, Request
+from gateway.deps import get_current_merchant
 from httpx import HTTPStatusError, RequestError
 
-from gateway.deps import get_current_merchant
-from shared.models.merchant import Merchant, MerchantStatus
+from shared.models.merchant import MerchantStatus
 
 
 @pytest.mark.asyncio

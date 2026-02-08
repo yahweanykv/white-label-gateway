@@ -1,17 +1,17 @@
 """Extended unit tests for payment service payments routes."""
 
-from unittest.mock import AsyncMock, MagicMock, patch
+from datetime import datetime
+from decimal import Decimal
+from unittest.mock import MagicMock
 from uuid import uuid4
 
 import pytest
-from decimal import Decimal
-from datetime import datetime
 from fastapi import FastAPI
 from fastapi.testclient import TestClient
-
 from payment_service.api.payments import router
 from payment_service.deps import get_db
-from shared.models.payment import PaymentMethod, PaymentRequest, PaymentStatus
+
+from shared.models.payment import PaymentStatus
 
 
 @pytest.fixture
@@ -135,9 +135,11 @@ class TestPaymentServicePaymentsExtended:
 
     def test_get_payment_from_db(self, client, monkeypatch):
         """Test getting payment from database when not in store."""
-        import payment_service.api.payments as payments_module
-        from shared.models.db import Payment as PaymentORM
         from datetime import datetime
+
+        import payment_service.api.payments as payments_module
+
+        from shared.models.db import Payment as PaymentORM
 
         payment_id = uuid4()
         merchant_id = uuid4()
@@ -172,9 +174,10 @@ class TestPaymentServicePaymentsExtended:
     def test_complete_3ds_with_db_payment(self, client, monkeypatch):
         """Test completing 3DS payment with DB payment."""
         import payment_service.api.payments as payments_module
-        from shared.models.db import Payment as PaymentORM
         from payment_service.core.mock_providers import payment_store
-        from shared.models.payment import PaymentResponse, PaymentMethod
+
+        from shared.models.db import Payment as PaymentORM
+        from shared.models.payment import PaymentMethod, PaymentResponse
 
         payments_module.settings.environment = "local"
         payments_module.settings.payment_provider = "mock_3ds"

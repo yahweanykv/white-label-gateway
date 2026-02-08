@@ -1,6 +1,5 @@
 """Tests for gateway main module."""
 
-import pytest
 from fastapi.testclient import TestClient
 
 from gateway.main import app

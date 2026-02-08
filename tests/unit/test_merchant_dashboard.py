@@ -6,8 +6,7 @@ from uuid import uuid4
 import pytest
 from fastapi import FastAPI
 from fastapi.testclient import TestClient
-
-from merchant_service.api.dashboard import get_dashboard, get_payment_stats, router
+from merchant_service.api.dashboard import get_payment_stats, router
 from merchant_service.models import Merchant
 
 

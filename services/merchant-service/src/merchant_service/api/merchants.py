@@ -1,11 +1,10 @@
 """Merchant API routes."""
 
 import secrets
-from typing import Annotated, Optional
+from typing import Annotated
 from uuid import UUID
 
-from fastapi import APIRouter, Depends, Header, HTTPException, Request, status
-from fastapi import Request
+from fastapi import APIRouter, Depends, HTTPException, Request, status
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select
 
@@ -168,7 +167,9 @@ async def get_merchant_by_api_key(
     from sqlalchemy import select
 
     result = await db.execute(
-        select(Merchant).where(Merchant.api_keys.contains([x_api_key]), Merchant.is_active == True)
+        select(Merchant).where(
+            Merchant.api_keys.contains([x_api_key]), Merchant.is_active.is_(True)
+        )
     )
     merchant = result.scalar_one_or_none()
 

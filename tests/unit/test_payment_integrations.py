@@ -1,16 +1,16 @@
 """Unit tests for payment service integrations."""
 
+from decimal import Decimal
 from unittest.mock import AsyncMock, MagicMock, patch
 from uuid import uuid4
 
 import pytest
-from decimal import Decimal
-
 from payment_service.integrations import (
     notify_customer,
     perform_fraud_check,
     publish_payment_event,
 )
+
 from shared.models.payment import PaymentMethod, PaymentRequest, PaymentResponse, PaymentStatus
 
 

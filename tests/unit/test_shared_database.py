@@ -6,7 +6,7 @@ from uuid import uuid4
 import pytest
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from shared.database import Database, Base, init_db, get_db, db
+from shared.database import Base, Database, db, get_db, init_db
 from shared.settings import DatabaseSettings
 
 
@@ -55,7 +55,7 @@ async def test_get_session_commit_on_success(database):
     mock_session.close = AsyncMock()
 
     with patch.object(database.async_session_maker, "__call__", return_value=mock_session):
-        async with database.get_session() as session:
+        async with database.get_session():
             pass
 
     mock_session.commit.assert_called_once()
@@ -71,7 +71,7 @@ async def test_get_session_rollback_on_exception(database):
 
     with patch.object(database.async_session_maker, "__call__", return_value=mock_session):
         try:
-            async with database.get_session() as session:
+            async with database.get_session():
                 raise ValueError("Test error")
         except ValueError:
             pass

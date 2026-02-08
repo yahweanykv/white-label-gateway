@@ -1,15 +1,13 @@
 """Extended unit tests for merchant service merchants routes."""
 
-from uuid import uuid4
-
 import pytest
 from fastapi import FastAPI
 from fastapi.testclient import TestClient
+from merchant_service.api.merchants import generate_api_key, router
+from merchant_service.models import Merchant
 from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine
 from sqlalchemy.orm import sessionmaker
 
-from merchant_service.api.merchants import router, generate_api_key
-from merchant_service.models import Merchant
 from shared.database import Base
 
 
@@ -39,7 +37,7 @@ def app():
 @pytest.fixture
 def client(app, db_session):
     """Create test client with database dependency override."""
-    from merchant_service.deps import get_db, get_current_merchant
+    from merchant_service.deps import get_current_merchant, get_db
 
     async def override_get_db():
         yield db_session
@@ -55,7 +53,7 @@ def client(app, db_session):
         result = await db_session.execute(
             __import__("sqlalchemy")
             .select(Merchant)
-            .where(Merchant.api_keys.contains([x_api_key]), Merchant.is_active == True)
+            .where(Merchant.api_keys.contains([x_api_key]), Merchant.is_active.is_(True))
         )
         merchant = result.scalar_one_or_none()
         if not merchant:

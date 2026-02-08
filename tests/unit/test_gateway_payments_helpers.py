@@ -5,8 +5,8 @@ from decimal import Decimal
 from uuid import uuid4
 
 import pytest
-
 from gateway.api.payments import _build_mock_query, _enrich_with_next_action
+
 from shared.models.merchant import Merchant, MerchantStatus
 from shared.models.payment import PaymentMethod, PaymentResponse, PaymentStatus
 

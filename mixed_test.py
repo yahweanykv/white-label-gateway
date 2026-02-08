@@ -43,7 +43,7 @@ def main():
     requests_per_tick = max(1, int(TARGET_RPS / 2))
     count = 0
     num_ticks = (TOTAL_REQUESTS + requests_per_tick - 1) // requests_per_tick
-    for i in range(num_ticks):
+    for _ in range(num_ticks):
         batch = min(requests_per_tick, TOTAL_REQUESTS - count)
         count += batch
         pct = 100 * count / TOTAL_REQUESTS
@@ -81,7 +81,7 @@ def main():
     print("=" * 110)
     print("Summary Report")
     print("=" * 110)
-    print(f"  Type     Name               # reqs    # fails  |   Avg       req/s  failures/s")
+    print("  Type     Name               # reqs    # fails  |   Avg       req/s  failures/s")
     print("-" * 110)
     for name in ["Health Check", "Create Payment", "Get Payment"]:
         s = stats[name]

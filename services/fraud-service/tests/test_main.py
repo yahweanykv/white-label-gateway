@@ -1,6 +1,5 @@
 """Tests for fraud service main module."""
 
-import pytest
 from fastapi.testclient import TestClient
 
 from fraud_service.main import app

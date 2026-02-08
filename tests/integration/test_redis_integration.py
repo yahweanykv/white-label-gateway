@@ -1,7 +1,6 @@
 """Integration tests for Redis operations."""
 
 import pytest
-from redis import Redis
 
 
 @pytest.mark.asyncio
@@ -39,7 +38,6 @@ async def test_redis_rate_limiting(redis_container):
 
     # Simulate rate limiting
     key = "rate_limit:merchant_123"
-    limit = 10
     window = 60
 
     # Increment counter

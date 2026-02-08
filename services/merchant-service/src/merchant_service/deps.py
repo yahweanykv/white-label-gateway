@@ -1,7 +1,6 @@
 """FastAPI dependencies for merchant service."""
 
-from typing import Annotated, AsyncGenerator, Optional
-from uuid import UUID
+from typing import Annotated, Optional
 
 from fastapi import Depends, HTTPException, Header, status
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -48,7 +47,9 @@ async def get_current_merchant(
 
     # Query merchant by API key
     result = await db.execute(
-        select(Merchant).where(Merchant.api_keys.contains([x_api_key]), Merchant.is_active == True)
+        select(Merchant).where(
+            Merchant.api_keys.contains([x_api_key]), Merchant.is_active.is_(True)
+        )
     )
     merchant = result.scalar_one_or_none()
 

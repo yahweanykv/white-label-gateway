@@ -1,18 +1,14 @@
 """Unit tests for gateway routes."""
 
 from datetime import datetime
-from decimal import Decimal
 from unittest.mock import AsyncMock, MagicMock, patch
 from uuid import uuid4
 
 import pytest
-from fastapi import HTTPException, status
-from httpx import Response
-
 from gateway.api.merchants import router as merchants_router
 from gateway.api.payments import router as payments_router
+
 from shared.models.merchant import Merchant, MerchantStatus
-from shared.models.payment import PaymentMethod, PaymentRequest, PaymentResponse, PaymentStatus
 
 
 class TestGatewayMerchantsRoutes:
@@ -182,7 +178,7 @@ class TestGatewayPaymentsRoutes:
         mock_client.post = AsyncMock(return_value=mock_response)
         mock_client_class.return_value = mock_client
 
-        from fastapi import FastAPI, Depends
+        from fastapi import Depends, FastAPI
         from fastapi.testclient import TestClient
 
         async def get_current_merchant():
@@ -237,7 +233,7 @@ class TestGatewayPaymentsRoutes:
         mock_client.post = AsyncMock(return_value=mock_response)
         mock_client_class.return_value = mock_client
 
-        from fastapi import FastAPI, Depends
+        from fastapi import Depends, FastAPI
         from fastapi.testclient import TestClient
 
         async def get_current_merchant():
@@ -292,7 +288,7 @@ class TestGatewayPaymentsRoutes:
         mock_client.get = AsyncMock(return_value=mock_response)
         mock_client_class.return_value = mock_client
 
-        from fastapi import FastAPI, Depends
+        from fastapi import Depends, FastAPI
         from fastapi.testclient import TestClient
 
         async def get_current_merchant():
@@ -326,7 +322,7 @@ class TestGatewayPaymentsRoutes:
         mock_client.get = AsyncMock(side_effect=error)
         mock_client_class.return_value = mock_client
 
-        from fastapi import FastAPI, Depends
+        from fastapi import Depends, FastAPI
         from fastapi.testclient import TestClient
 
         async def get_current_merchant():
@@ -366,7 +362,7 @@ class TestGatewayPaymentsRoutes:
         mock_client.post = AsyncMock(side_effect=error)
         mock_client_class.return_value = mock_client
 
-        from fastapi import FastAPI, Depends
+        from fastapi import Depends, FastAPI
         from fastapi.testclient import TestClient
 
         async def get_current_merchant():
@@ -410,7 +406,7 @@ class TestGatewayPaymentsRoutes:
         mock_client.post = AsyncMock(side_effect=error)
         mock_client_class.return_value = mock_client
 
-        from fastapi import FastAPI, Depends
+        from fastapi import Depends, FastAPI
         from fastapi.testclient import TestClient
 
         async def get_current_merchant():
@@ -451,7 +447,7 @@ class TestGatewayPaymentsRoutes:
         mock_client.get = AsyncMock(side_effect=error)
         mock_client_class.return_value = mock_client
 
-        from fastapi import FastAPI, Depends
+        from fastapi import Depends, FastAPI
         from fastapi.testclient import TestClient
 
         async def get_current_merchant():
@@ -481,7 +477,7 @@ class TestGatewayPaymentsRoutes:
         mock_client.get = AsyncMock(side_effect=error)
         mock_client_class.return_value = mock_client
 
-        from fastapi import FastAPI, Depends
+        from fastapi import Depends, FastAPI
         from fastapi.testclient import TestClient
 
         async def get_current_merchant():

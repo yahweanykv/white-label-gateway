@@ -1,12 +1,10 @@
 """Unit tests for gateway main."""
 
-import os
-from unittest.mock import AsyncMock, MagicMock, patch
+from unittest.mock import patch
 
 import pytest
 from fastapi.testclient import TestClient
-
-from gateway.main import app, custom_openapi, lifespan, root, metrics, signal_handler
+from gateway.main import app, custom_openapi, lifespan, signal_handler
 
 
 class TestGatewayMain:
@@ -54,7 +52,7 @@ class TestGatewayMain:
     @pytest.mark.asyncio
     async def test_lifespan_startup_shutdown(self):
         """Test lifespan context manager."""
-        from unittest.mock import AsyncMock, MagicMock
+        from unittest.mock import AsyncMock
 
         mock_redis = AsyncMock()
         mock_redis.connect = AsyncMock()

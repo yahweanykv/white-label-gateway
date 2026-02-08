@@ -1,8 +1,9 @@
 """Unit tests for shared Redis client."""
 
-from unittest.mock import AsyncMock, MagicMock, patch
-import pytest
 import json
+from unittest.mock import AsyncMock, patch
+
+import pytest
 
 from shared.redis import RedisClient
 from shared.settings import RedisSettings

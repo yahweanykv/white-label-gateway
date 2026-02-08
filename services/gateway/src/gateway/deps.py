@@ -5,7 +5,7 @@ from typing import Annotated, AsyncGenerator, Optional
 from uuid import UUID
 
 import httpx
-from fastapi import Depends, HTTPException, Header, Request, status
+from fastapi import HTTPException, Header, Request, status
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from shared.database import get_db as shared_get_db, init_db, DatabaseSettings

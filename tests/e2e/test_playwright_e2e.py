@@ -1,12 +1,11 @@
 """E2E tests using Playwright."""
 
 import os
-import time
 from uuid import uuid4
 
 import httpx
 import pytest
-from playwright.async_api import Page, async_playwright
+from playwright.async_api import async_playwright
 
 # Use 127.0.0.1 to avoid IPv6 localhost issues on Windows/Docker
 DEFAULT_HOST = "127.0.0.1"
@@ -195,7 +194,6 @@ async def test_merchant_dashboard_e2e(merchant_service_url):
         )
         assert merchant_response.status_code == 201
         merchant = merchant_response.json()
-        merchant_id = merchant["id"]
         api_key = merchant["api_keys"][0]
 
         # Access dashboard (requires api_key for auth)
